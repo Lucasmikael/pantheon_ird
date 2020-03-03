@@ -10,6 +10,7 @@ import random as rd
 from numpy import array
 from pythonis_tools import Flatten
 
+
 def ImportBooleanModel(genes_list_file, network_structure_file, nb_columns_genes=3, name_index=1,
                        nb_columns_network=6, network_headers=1):
     """
@@ -34,7 +35,7 @@ def ImportBooleanModel(genes_list_file, network_structure_file, nb_columns_genes
     #####
 
     # get in directory where text files are located - deprecated with gui as we get the absolute file location directly
-    #os.chdir(working_directory)
+    # os.chdir(working_directory)
 
     # open genes list file, read its content and close it to clear memory
     # create a list from the file content and keep only the (name_index)th elements starting at the (name_index)ed one
@@ -110,8 +111,6 @@ def ImportBooleanModel(genes_list_file, network_structure_file, nb_columns_genes
     return present_genes, genes_network, absent_genes, genes_network_for_gui
 
 
-
-
 def InitializeState(genes_names, initial_state_choice='random', initial_state_genes=['foo']):
     """
     Initialize the gene list state according to the chosen option.
@@ -138,7 +137,7 @@ def InitializeState(genes_names, initial_state_choice='random', initial_state_ge
 
     elif initial_state_choice == 'specified':
         if initial_state_genes == ['foo']:
-            print ("\nList of active initial genes is empty - ending computation")
+            print("\nList of active initial genes is empty - ending computation")
             return False
 
         else:
@@ -157,7 +156,7 @@ def InitializeState(genes_names, initial_state_choice='random', initial_state_ge
         state = np.array(a)
         all_ones = np.ones(len(genes_names), dtype=np.int)
         if initial_state_genes == ['foo']:
-            print ("\nGene non specified - ending computation")
+            print("\nGene non specified - ending computation")
             return False
         else:
             count = 0
@@ -167,18 +166,19 @@ def InitializeState(genes_names, initial_state_choice='random', initial_state_ge
                     res[count] = 1
                     count += 1
                 else:
-                    res[count] = rd.randint(0,1)
+                    res[count] = rd.randint(0, 1)
                     count += 1
             state = array(res)
 
     else:
-        print ("\nInvalid initialization choice - ending computation")
+        print("\nInvalid initialization choice - ending computation")
         return False
 
     return state
 
 
-def ComputeNextState(genes_names, genes_network, state_flow, model='logical', stimulus='transient', KO_genes=['foo'], OA_genes = ['foo']):
+def ComputeNextState(genes_names, genes_network, state_flow, model='logical', stimulus='transient', KO_genes=['foo'],
+                     OA_genes=['foo']):
     """
     Compute the next state and append it to the state flow according to the chosen model and given gene network.
 
@@ -224,15 +224,17 @@ def ComputeNextState(genes_names, genes_network, state_flow, model='logical', st
         for source_gene in genes_network:
 
             if source_gene not in regulated_genes:
-            # root genes depend on input external to the network, we use the specified model to determine their behavior when we encounter them since they are not otherwise regulated
+                # root genes depend on input external to the network, we use the specified model to determine their behavior when we encounter them since they are not otherwise regulated
                 # transient - gene is only stimulated once
                 # constant - any stimulation is constant
                 if stimulus == 'transient':
                     state_flow[-1][genes_names.index(source_gene)] = 0  # stimulus only applied once if applied
                 elif stimulus == 'constant':
-                    state_flow[-1][genes_names.index(source_gene)] = state_flow[-2][genes_names.index(source_gene)]  # could have left the line blank as no other input will change the root genes
+                    state_flow[-1][genes_names.index(source_gene)] = state_flow[-2][genes_names.index(
+                        source_gene)]  # could have left the line blank as no other input will change the root genes
                 else:
-                    print ("\nWarning - wrong model name given for the behavior of network root genes - using default model (transient) instead")
+                    print(
+                        "\nWarning - wrong model name given for the behavior of network root genes - using default model (transient) instead")
                     state_flow[-1][genes_names.index(source_gene)] = 0  # stimulus only applied once if applied
 
             # and then we apply the proper regulations to their targets
@@ -259,14 +261,13 @@ def ComputeNextState(genes_names, genes_network, state_flow, model='logical', st
                                     state_flow[-1][genes_names.index(target_gene)] == 2):
                                 state_flow[-1][genes_names.index(target_gene)] = 3
                     else:  # null interaction - should not happen
-                        print ("\nWarning - null interaction detected between "), source_gene, target_gene
-
+                        print("\nWarning - null interaction detected between "), source_gene, target_gene
 
         # set KO or overactivated genes to their constant values - do it in a single pass rather than checking during each previous computation
         for gene in genes_names:
-            if gene in KO_genes :
+            if gene in KO_genes:
                 state_flow[-1][genes_names.index(gene)] = 0  # always off
-            elif gene in OA_genes :
+            elif gene in OA_genes:
                 state_flow[-1][genes_names.index(gene)] = 1  # always on
 
         # binarize gene activity to remove repression, autoactivation and non-autoactivation flags after all operations are done
@@ -299,22 +300,24 @@ def ComputeNextState(genes_names, genes_network, state_flow, model='logical', st
                 if stimulus == 'transient':
                     state_flow[-1][genes_names.index(source_gene)] = 0  # stimulus only applied once if applied
                 elif stimulus == 'constant':
-                    state_flow[-1][genes_names.index(source_gene)] = state_flow[-2][genes_names.index(source_gene)]  # could have left the line blank as no other input will change the root genes
+                    state_flow[-1][genes_names.index(source_gene)] = state_flow[-2][genes_names.index(
+                        source_gene)]  # could have left the line blank as no other input will change the root genes
                 else:
-                    print ("\nWarning - wrong model name given for the behavior of network root genes - using default model (transient) instead")
+                    print(
+                        "\nWarning - wrong model name given for the behavior of network root genes - using default model (transient) instead")
                     state_flow[-1][genes_names.index(source_gene)] = 0  # stimulus only applied once if applied
 
             # then we apply the proper regulation to their targets
 
             for [interaction, target_gene] in genes_network[source_gene]:
-                state_flow[-1][genes_names.index(target_gene)] += (float(interaction) * float(state_flow[-2][genes_names.index(source_gene)]))
-
+                state_flow[-1][genes_names.index(target_gene)] += (
+                            float(interaction) * float(state_flow[-2][genes_names.index(source_gene)]))
 
         # set KO or overactivated genes to their constant values - do it in a single pass rather than checking during each previous computation
         for gene in genes_names:
-            if gene in KO_genes :
+            if gene in KO_genes:
                 state_flow[-1][genes_names.index(gene)] = 0  # always off
-            elif gene in OA_genes :
+            elif gene in OA_genes:
                 state_flow[-1][genes_names.index(gene)] = 1  # always on
 
         # binarize gene activity after all operations are done
@@ -329,13 +332,13 @@ def ComputeNextState(genes_names, genes_network, state_flow, model='logical', st
         for source_gene in genes_network:
             for [interaction, target_gene] in genes_network[source_gene]:
                 state_flow[-1][genes_names.index(target_gene)] += (
-                            float(interaction) * float(state_flow[-2][genes_names.index(source_gene)]))
+                        float(interaction) * float(state_flow[-2][genes_names.index(source_gene)]))
         # binarize gene activity after all operations are done
         binarize = lambda x: (0 if x < 0 else 1 if x > 1 else x)
         state_flow[-1] = map(binarize, state_flow[-1])
 
     else:
-        print ("\nInvalid model name - ending computation")
+        print("\nInvalid model name - ending computation")
         return False
 
     return state_flow
@@ -358,21 +361,21 @@ def HarvestStableStates(genes_names, genes_network, state_flow_network, verbose=
     # create a list of all possible starting states to explore
     # rationalize the harvest process by only starting from the origin states in the flow, i.e. the states that are present in the keys but not in the values
 
-    if len(state_flow_network) == 0 :
-        print ('\n invalid state flow network (empty) - ending computation')
+    if len(state_flow_network) == 0:
+        print('\n invalid state flow network (empty) - ending computation')
         return false
 
-    elif len(state_flow_network) == 1 :  # only a single stable state in the flow
+    elif len(state_flow_network) == 1:  # only a single stable state in the flow
         for k in state_flow_network.keys():
             single = k
         stable_states[tuple(single)] = 1
 
-    else :  # more than 1 state in the flow
+    else:  # more than 1 state in the flow
         starts = set(state_flow_network.keys())
         ends = set(state_flow_network.values())
         starting_points = list(starts - ends)
 
-        if starting_points == []:   # the state flow network was only composed of the states forming a cyclic dynamic stable state
+        if starting_points == []:  # the state flow network was only composed of the states forming a cyclic dynamic stable state
             state = rd.choice(state_flow_network.keys())
             explored_states = []
             path = []
@@ -386,20 +389,22 @@ def HarvestStableStates(genes_names, genes_network, state_flow_network, verbose=
                 if verbose:
                     if (total_state_nb > 10):
                         if not (count % tenpercent):
-                            print ("Harvesting stable states - %.0f%% of all given states explored") % (
+                            print("Harvesting stable states - %.0f%% of all given states explored") % (
                                     100 * float(count) / float(total_state_nb))
                     else:
-                        print ("Harvesting stable state from state", count, "out of", total_state_nb)
+                        print("Harvesting stable state from state", count, "out of", total_state_nb)
 
                 state = state_flow_network[state]
 
                 if (state in path):  # we have come back to the start of the loop
-                    start = path.index(state)  # find starting point of this new loop - index returns the position of the first occurence of 'state' in the path
+                    start = path.index(
+                        state)  # find starting point of this new loop - index returns the position of the first occurence of 'state' in the path
                     loop = path[start:]  # slice the part of the path that correspond to the new loop
-                    stable_states[tuple(loop)] = len(path)  # create an entry for the loop in the stable states record with initial basin size = len path (states leading to the loop + size of the loop)
+                    stable_states[tuple(loop)] = len(
+                        path)  # create an entry for the loop in the stable states record with initial basin size = len path (states leading to the loop + size of the loop)
 
 
-        else :   # flow start outside of any loop
+        else:  # flow start outside of any loop
             explored_states = []
 
             #####
@@ -425,10 +430,10 @@ def HarvestStableStates(genes_names, genes_network, state_flow_network, verbose=
                     if verbose:
                         if (total_state_nb > 10):
                             if not (count % tenpercent):
-                                print ("Harvesting stable states - %.0f%% of all given states explored") % (
-                                            100 * count / total_state_nb)
+                                print("Harvesting stable states -", 100 * count / total_state_nb,
+                                      "of all given states explored")
                         else:
-                            print ("Harvesting stable state from state", count, "out of", total_state_nb)
+                            print("Harvesting stable state from state", count, "out of", total_state_nb)
                     # remove this new state from the possible starting points if it is there to avoid charting the same path multiple times -
                     # if state in starting_points:
                     #	starting_points.remove(state)
@@ -439,23 +444,29 @@ def HarvestStableStates(genes_names, genes_network, state_flow_network, verbose=
                 # or just a junction point to an already explored path (n.b. the already explored path can be a single point - i.e. a stable state)
 
                 if (state in path):  # the path contain a dynamical stable state loop that was not already accounted for
-                    start = path.index(state)  # find starting point of this new loop - index returns the position of the first occurence of 'state' in the path
+                    start = path.index(
+                        state)  # find starting point of this new loop - index returns the position of the first occurence of 'state' in the path
                     loop = path[start:]  # slice the part of the path that correspond to the new loop
-                    stable_states[tuple(loop)] = len(path)  # create an entry for the loop in the stable states record with initial basin size = len path (states leading to the loop + size of the loop)
+                    stable_states[tuple(loop)] = len(
+                        path)  # create an entry for the loop in the stable states record with initial basin size = len path (states leading to the loop + size of the loop)
 
-                elif (state in explored_states):  # either started from an already treated state, or found a junction point - means that what is forward of there has already been dealt with - find the downward stable point and add to its basin size the len of newly uncovered path
+                elif (
+                        state in explored_states):  # either started from an already treated state, or found a junction point - means that what is forward of there has already been dealt with - find the downward stable point and add to its basin size the len of newly uncovered path
                     if path != []:  # we did at least one iteration of the while loop
                         terminal_flag = False
                         while not terminal_flag:  # while we have not reached one of the stable states
                             for final_state_list in stable_states.keys():  # check all stable states one by one
-                                if not any(isinstance(sub_state, tuple) for sub_state in final_state_list):  # there is only a unique stable state, not a loop with sub-states
+                                if not any(isinstance(sub_state, tuple) for sub_state in
+                                           final_state_list):  # there is only a unique stable state, not a loop with sub-states
                                     if (state == final_state_list):
                                         terminal_flag = True
-                                        stable_states[final_state_list] += len(path)  # add the len of path to the basin of attraction size for this stable state
+                                        stable_states[final_state_list] += len(
+                                            path)  # add the len of path to the basin of attraction size for this stable state
                                         break  # stop searching through the stable states
                                 elif state in final_state_list:  # if the current state is part of a stable loop
                                     terminal_flag = True
-                                    stable_states[final_state_list] += len(path)  # add the len of path to the basin of attraction size for this stable state
+                                    stable_states[final_state_list] += len(
+                                        path)  # add the len of path to the basin of attraction size for this stable state
                                     break  # stop searching through the stable states
                             if not terminal_flag:  # if the current state was not part of a stable state, progress one state further
                                 state = state_flow_network[state]
@@ -466,26 +477,27 @@ def HarvestStableStates(genes_names, genes_network, state_flow_network, verbose=
                     explored_states.append(state)  # check it as explored now
                     # if state in starting_points:     		# remove it from possible starting points
                     #	starting_points.remove(state)
-                    stable_states[tuple(state)] = len(path) + 1  # create an entry for the stable state as a tuple with 1 element and basin size = len path leading there + 1 for the stable state
+                    stable_states[tuple(state)] = len(
+                        path) + 1  # create an entry for the stable state as a tuple with 1 element and basin size = len path leading there + 1 for the stable state
                     # we found a new attractor which jumped us out of the while loop without counting it - so count it for the progress tracker
                     count += 1
                     if verbose:
                         if (total_state_nb > 10):
                             if not (count % tenpercent):
-                                print ("Harvesting stable states - %.0f%% of all given states explored" % (
-                                            100 * float(count) / float(total_state_nb)))
+                                print("Harvesting stable states - %.0f%% of all given states explored" % (
+                                        100 * float(count) / float(total_state_nb)))
                         else:
-                            print ("Harvesting stable state from state", count, "out of", total_state_nb)
+                            print("Harvesting stable state from state", count, "out of", total_state_nb)
                 else:
-                    print ('Something strange is happening that should not happen during harvesting. Ending computation.')
+                    print(
+                        'Something strange is happening that should not happen during harvesting. Ending computation.')
                     return False
 
     return stable_states
 
 
-
-
-def RunBooleanModel(genes_names, genes_network, initial_state_number='all', initial_state_choice='random', initial_state_genes=['foo'],
+def RunBooleanModel(genes_names, genes_network, initial_state_number='all', initial_state_choice='random',
+                    initial_state_genes=['foo'],
                     model='logical', stimulus='transient', verbose=True, KO_genes=['foo'], OA_genes=['foo']):
     """
     Run the chosen boolean model over the given network.
@@ -519,28 +531,29 @@ def RunBooleanModel(genes_names, genes_network, initial_state_number='all', init
 
     # Create the collection of starting states according to the user choice
     if verbose:
-        print ("\nInitializing network starting state collection")
+        print("\nInitializing network starting state collection")
     start_time = time.time()
 
     initial_states = []
 
     if initial_state_number == 'all':
-        print ("\nWarning - if the number of genes is large, generating all possible network states can be an extensive process")
+        print(
+            "\nWarning - if the number of genes is large, generating all possible network states can be an extensive process")
         # create all possible 01 configurations for the given genes names space
         all_states_sequences = map(''.join, itertools.product('01', repeat=len(genes_names)))
         # convert those string sequence to numpy arrays with all gene states individualized
         for seq in all_states_sequences:
             initial_states.append(np.array(map(int, seq)))
-        print ("\nWarning - the total number of possible initial states is", len(initial_states),
-        tenpercent = len(initial_states) / 10)
+        print("\nWarning - the total number of possible initial states is", len(initial_states),
+              tenpercent=len(initial_states) / 10)
     else:  # generate a given number of initial states
         try:
             number = int(initial_state_number)
         except:
-            print ("\nInvalid number of initial states - please enter either 'single', 'all' or a valid integer")
+            print("\nInvalid number of initial states - please enter either 'single', 'all' or a valid integer")
         else:
             if number <= 0:
-                print ("\nNull or negative number of starting states - adjusting computation to a single starting state")
+                print("\nNull or negative number of starting states - adjusting computation to a single starting state")
                 number = 1
             if number == 1:
                 starting_state = InitializeState(genes_names, initial_state_choice, initial_state_genes)
@@ -557,7 +570,7 @@ def RunBooleanModel(genes_names, genes_network, initial_state_number='all', init
 
     # start the loop for flow progression from each non already checked starting state
     if verbose:
-        print ("\nComputing state progression from each starting state")
+        print("\nComputing state progression from each starting state")
 
     count = 0
 
@@ -569,10 +582,10 @@ def RunBooleanModel(genes_names, genes_network, initial_state_number='all', init
         if verbose:
             if (initial_state_number != 'single') and (len(initial_states) > 10):
                 if not (count % tenpercent):
-                    print ("Exploring - %.0f%% of specified initial states done" % (
-                                100 * float(count) / float(len(initial_states))))
+                    print("Exploring - %.0f%% of specified initial states done" % (
+                            100 * float(count) / float(len(initial_states))))
             else:
-                print ("Exploring from state", count, "out of", len(initial_states))
+                print("Exploring from state", count, "out of", len(initial_states))
 
         # if this state has not already been encountered previously in the flow, follow this path for a first iteration
         # otherwise skip to next possible initial state
@@ -606,12 +619,13 @@ def RunBooleanModel(genes_names, genes_network, initial_state_number='all', init
                 # if model is 'logical', this added state will be wiped (no memory)
                 # in other model cases, it may be used as the memory of network state for computation purpose
                 state_flow = stack((state_flow, state_flow[-1]))
-                state_flow = ComputeNextState(genes_names, genes_network, state_flow, model, stimulus, KO_genes, OA_genes)
+                state_flow = ComputeNextState(genes_names, genes_network, state_flow, model, stimulus, KO_genes,
+                                              OA_genes)
                 state_flow_network[tuple(state_flow[-2])] = tuple(state_flow[-1])
                 stop_flag = tuple(state_flow[-1]) in state_flow_network.keys()
 
     if verbose:
-        print ("\nHarvesting stable states")
+        print("\nHarvesting stable states")
 
     stable_states = HarvestStableStates(genes_names, genes_network, state_flow_network, verbose)
 
@@ -625,20 +639,22 @@ def RunBooleanModel(genes_names, genes_network, initial_state_number='all', init
 
     time_passed = (time.time() - start_time)
     if verbose:
-        print ("\n####### Results summary #######\n#\n# Run parameters :", len(genes_names), "genes in the network ;", len(
-            Flatten(list(genes_network.values()))) / 2, "interactions in the network ;\n# ", model, "model ;", stimulus, "boundary condition ; ", "KO genes : ", KO_genes, " ; OA genes : ", OA_genes)
-        print ("# Number of initial states :", len(initial_states))
-        print ("# Number of stable states :", len(stable_states))
-        print ("# Size of stable states and respective attraction basins :")
-        print ("#", data)
-        print ("# Running time (seconds) %s", time_passed)
-        print ("#\n########################")
+        print("\n####### Results summary #######\n#\n# Run parameters :", len(genes_names), "genes in the network ;",
+              len(
+                  Flatten(list(genes_network.values()))) / 2, "interactions in the network ;\n# ", model, "model ;",
+              stimulus, "boundary condition ; ", "KO genes : ", KO_genes, " ; OA genes : ", OA_genes)
+        print("# Number of initial states :", len(initial_states))
+        print("# Number of stable states :", len(stable_states))
+        print("# Size of stable states and respective attraction basins :")
+        print("#", data)
+        print("# Running time (seconds) %s", time_passed)
+        print("#\n########################")
         print("\n")
         print("# Full run result saved to csv files.")
 
     if (initial_state_number == 'single') or (int(initial_state_number) <= 1):
-        return state_flow_network, stable_states, starting_state, len(stable_states), len(initial_states),\
-                len(genes_names), data, len(Flatten(list(genes_network.values()))) / 2, time_passed
+        return state_flow_network, stable_states, starting_state, len(stable_states), len(initial_states), \
+               len(genes_names), data, len(Flatten(list(genes_network.values()))) / 2, time_passed
     else:
-        return state_flow_network, stable_states, 'several_state_run', len(stable_states), len(initial_states),\
-                len(genes_names), data, len(Flatten(list(genes_network.values()))) / 2, time_passed
+        return state_flow_network, stable_states, 'several_state_run', len(stable_states), len(initial_states), \
+               len(genes_names), data, len(Flatten(list(genes_network.values()))) / 2, time_passed

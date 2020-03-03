@@ -1,4 +1,3 @@
-
 #######
 #
 # Testing scripts
@@ -90,10 +89,12 @@ b13 = {'A': [['1', 'B'], ['1', 'G']], 'B': [['1', 'C'], ['-1', 'A'], ['-1', 'F']
 flow13, stable13, start13 = RunBooleanModel(a13, b13, 't', 't', 'all')
 
 # for network pruning test 
-pruning_test = {'Z1':[['1','Z2']],'Z2':[['1','Z3']],'Z3':[['1','A']], 'A': [['-1', 'B'], ['-1', 'C']], 'B': [['1', 'D'],['1','J']],
-           'C': [['1', 'E']], 'D': [['-1', 'B'], ['1', 'F']], 'E': [['1', 'C'], ['-1', 'G']],
-           'F': [['1', 'H']], 'G': [['1', 'I']]}
+pruning_test = {'Z1': [['1', 'Z2']], 'Z2': [['1', 'Z3']], 'Z3': [['1', 'A']], 'A': [['-1', 'B'], ['-1', 'C']],
+                'B': [['1', 'D'], ['1', 'J']],
+                'C': [['1', 'E']], 'D': [['-1', 'B'], ['1', 'F']], 'E': [['1', 'C'], ['-1', 'G']],
+                'F': [['1', 'H']], 'G': [['1', 'I']]}
 core_test = ExtractCoreNetwork(pruning_test)
-print pruning_test
-print core_test
-
+print
+pruning_test
+print
+core_test

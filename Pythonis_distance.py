@@ -16,8 +16,7 @@ from scipy.spatial import distance
 
 
 def fonctionMain(working_directory, genes_list_file, network_structure_file, nb_columns_genes=2, name_index=0,
-                       nb_columns_network=3, network_headers=1, starting_sample_size=100):
-
+                 nb_columns_network=3, network_headers=1, starting_sample_size=100):
     N = starting_sample_size
 
     os.chdir(working_directory)
@@ -41,23 +40,21 @@ def fonctionMain(working_directory, genes_list_file, network_structure_file, nb_
     for (param1, param2) in parameter_list:
         return
 
-
-
-
-
-
-    flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModel(a, b, 't', 't',
-                                         initial_state_number=100, initial_state_choice='random',
-                                          stimulus='transient', initial_state_genes=['foo'], model='algebraic')
-
+    flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModel(a, b, 't',
+                                                                                                           't',
+                                                                                                           initial_state_number=100,
+                                                                                                           initial_state_choice='random',
+                                                                                                           stimulus='transient',
+                                                                                                           initial_state_genes=[
+                                                                                                               'foo'],
+                                                                                                           model='algebraic')
 
     resMod(a, b, start, flow, stable, genes_list_file, network_structure_file, genes_names, network, initial_states,
            stable_states, data)
-    #listing(stable_states, data, stable)
-    #performance(time, initial_state_number=50000)
+    # listing(stable_states, data, stable)
+    # performance(time, initial_state_number=50000)
 
     return a, b, flow, stable, start
-
 
 
 #######
@@ -67,12 +64,9 @@ def fonctionMain(working_directory, genes_list_file, network_structure_file, nb_
 #######
 
 if __name__ == "__main__":
-   a, b, flow, stable, start = fonctionMain("C:\Pythonis\Files_to_run".decode("utf-8"), "genes_list_os.txt",
-                                     "ReseauConsolideLitterature.sif", nb_columns_genes=1, name_index=1, nb_columns_network=3)
-
-
-
-
+    a, b, flow, stable, start = fonctionMain("C:\Pythonis\Files_to_run".decode("utf-8"), "genes_list_os.txt",
+                                             "ReseauConsolideLitterature.sif", nb_columns_genes=1, name_index=1,
+                                             nb_columns_network=3)
 
 """
 
