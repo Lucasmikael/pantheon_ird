@@ -559,7 +559,7 @@ def RunBooleanModel(genes_names, genes_network, initial_state_number='all', init
                 starting_state = InitializeState(genes_names, initial_state_choice, initial_state_genes)
                 initial_states.append(starting_state)
             else:
-                for i in xrange(number):  # using xrange instead of range to speed up allocating process
+                for i in range(number):  # using xrange instead of range to speed up allocating process
                     initial_states.append(InitializeState(genes_names, initial_state_choice, initial_state_genes))
                 tenpercent = len(initial_states) / 10
 
