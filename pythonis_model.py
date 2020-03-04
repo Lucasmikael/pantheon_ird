@@ -389,8 +389,8 @@ def HarvestStableStates(genes_names, genes_network, state_flow_network, verbose=
                 if verbose:
                     if (total_state_nb > 10):
                         if not (count % tenpercent):
-                            print("Harvesting stable states - %.0f%% of all given states explored") % (
-                                    100 * float(count) / float(total_state_nb))
+                            print("Harvesting stable states ", 100 * float(count) / float(total_state_nb) ," of all given states explored")
+
                     else:
                         print("Harvesting stable state from state", count, "out of", total_state_nb)
 
@@ -651,6 +651,7 @@ def RunBooleanModel(genes_names, genes_network, initial_state_number='all', init
         print("#\n########################")
         print("\n")
         print("# Full run result saved to csv files.")
+        print("ETAT STATIONNAIRE : ",stable_states, "FLOW D'ETATS : ", state_flow_network)
 
     if (initial_state_number == 'single') or (int(initial_state_number) <= 1):
         return state_flow_network, stable_states, starting_state, len(stable_states), len(initial_states), \
