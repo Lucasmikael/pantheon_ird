@@ -651,7 +651,7 @@ def RunBooleanModel(genes_names, genes_network, initial_state_number='all', init
         print("#\n########################")
         print("\n")
         print("# Full run result saved to csv files.")
-        print("ETAT STATIONNAIRE : ",stable_states, "FLOW D'ETATS : ", state_flow_network)
+
 
     if (initial_state_number == 'single') or (int(initial_state_number) <= 1):
         return state_flow_network, stable_states, starting_state, len(stable_states), len(initial_states), \
