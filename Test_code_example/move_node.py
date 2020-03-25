@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib
 import matplotlib as m
 import matplotlib.path as mpath
 import matplotlib.patches as mpatches
@@ -11,6 +12,8 @@ except:
 
 import networkx as nx
 import math
+matplotlib.use("TkAgg")
+
 # try:
 #     from networkx import graphviz_layout
 #     layout=nx.graphviz_layout
@@ -23,8 +26,8 @@ n = 50
 p = 0.15
 G = nx.binomial_graph(n,p)
 #Gcc=nx.connected_component_subgraphs(G2)
-print (G.edges())
-pos=nx.spring_layout(G, iterations=50)
+# print (G.edges())
+pos=nx.spring_layout(G, iterations=750)
 
 Path = mpath.Path
 
