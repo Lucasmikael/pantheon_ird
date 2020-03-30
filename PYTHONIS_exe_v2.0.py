@@ -17,43 +17,44 @@ from pythonis_filesIO import *
 from pythonis_model import *
 from random_network import *
 from Helios_model import *
+from Helios_Refactor_Pythonis import *
 
 
-def fonctionMain(working_directory, genes_list_file, network_structure_file, nb_columns_genes=1, name_index=1,
-                 nb_columns_network=3, network_headers=0, nb_starting_states='10', KO_genes_param=['foo'],
-                 OA_genes_param=['foo'], model_type='logical', boundary_model='transient'):
-    os.chdir(working_directory)
-    a, b, c = ImportBooleanModel(working_directory, genes_list_file, network_structure_file, nb_columns_genes,
-                                 name_index,
-                                 nb_columns_network, network_headers)
-
-    flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModel(a, b, 't',
-                                                                                                           't',
-                                                                                                           initial_state_number=nb_starting_states,
-                                                                                                           initial_state_choice='random',
-                                                                                                           stimulus=boundary_model,
-                                                                                                           initial_state_genes=[
-                                                                                                               'foo'],
-                                                                                                           model=model_type,
-                                                                                                           KO_genes=KO_genes_param,
-                                                                                                           OA_genes=OA_genes_param)
-
-    resMod(a, b, start, flow, stable, genes_list_file, network_structure_file, genes_names, KO_genes_param,
-           OA_genes_param, model_type, boundary_model, network, initial_states,
-           stable_states, data)
-    # listing(stable_states, data, stable)
-    # performance(time, initial_state_number=50000)
-
-    return a, b, flow, stable, start
-
-
-def generate_pairs(source):
-    pairs = []
-    for p1 in range(len(source)):
-        for p2 in range(p1 + 1, len(source)):
-            pairs.append([source[p1], source[p2]])
-    return pairs
-
+# def fonctionMain(working_directory, genes_list_file, network_structure_file, nb_columns_genes=1, name_index=1,
+#                  nb_columns_network=3, network_headers=0, nb_starting_states='10', KO_genes_param=['foo'],
+#                  OA_genes_param=['foo'], model_type='logical', boundary_model='transient'):
+#     os.chdir(working_directory)
+#     a, b, c = ImportBooleanModel(working_directory, genes_list_file, network_structure_file, nb_columns_genes,
+#                                  name_index,
+#                                  nb_columns_network, network_headers)
+#
+#     flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModel(a, b, 't',
+#                                                                                                            't',
+#                                                                                                            initial_state_number=nb_starting_states,
+#                                                                                                            initial_state_choice='random',
+#                                                                                                            stimulus=boundary_model,
+#                                                                                                            initial_state_genes=[
+#                                                                                                                'foo'],
+#                                                                                                            model=model_type,
+#                                                                                                            KO_genes=KO_genes_param,
+#                                                                                                            OA_genes=OA_genes_param)
+#
+#     resMod(a, b, start, flow, stable, genes_list_file, network_structure_file, genes_names, KO_genes_param,
+#            OA_genes_param, model_type, boundary_model, network, initial_states,
+#            stable_states, data)
+#     # listing(stable_states, data, stable)
+#     # performance(time, initial_state_number=50000)
+#
+#     return a, b, flow, stable, start
+#
+#
+# def generate_pairs(source):
+#     pairs = []
+#     for p1 in range(len(source)):
+#         for p2 in range(p1 + 1, len(source)):
+#             pairs.append([source[p1], source[p2]])
+#     return pairs
+#
 
 #######
 #
@@ -135,11 +136,11 @@ if __name__ == "__main__":
             RandomGRN1("F:/paperPYTHONIS/LRPNetwork-201903/files_to_run".decode("utf-8"), genes_list_file='GAIA_genes.txt',
                        network_structure_file='GAIA_network.txt', number_of_nodes=GAIA_genes,
                        number_of_edges=GAIA_interactions)
-            genes_names_list, network_dictionary, unused_genes, network_as_list = ImportBooleanModel(
+            genes_names_list, network_dictionary, unused_genes, network_as_list, genes_non_sort = ImportBooleanModel(
                 "F:/paperPYTHONIS/LRPNetwork-201903/files_to_run/GAIA_genes.txt",
                 "F:/paperPYTHONIS/LRPNetwork-201903/files_to_run/GAIA_network.txt")
         else:
-            genes_names_list, network_dictionary, unused_genes, network_as_list = ImportBooleanModel(genes_list_filename,
+            genes_names_list, network_dictionary, unused_genes, network_as_list, genes_non_sort = ImportBooleanModel(genes_list_filename,
                                                                                                      network_filename)
 
         # Columns layout for the batch mode window
@@ -308,11 +309,11 @@ if __name__ == "__main__":
             RandomGRN1("F:/paperPYTHONIS/LRPNetwork-201903/files_to_run".decode("utf-8"), genes_list_file='GAIA_genes.txt',
                        network_structure_file='GAIA_network.txt', number_of_nodes=GAIA_genes,
                        number_of_edges=GAIA_interactions)
-            genes_names_list, network_dictionary, unused_genes, network_as_list = ImportBooleanModel(
+            genes_names_list, network_dictionary, unused_genes, network_as_list, genes_non_sort = ImportBooleanModel(
                 "F:/paperPYTHONIS/LRPNetwork-201903/files_to_run/GAIA_genes.txt",
                 "F:/paperPYTHONIS/LRPNetwork-201903/files_to_run/GAIA_network.txt")
         else:
-            genes_names_list, network_dictionary, unused_genes, network_as_list = ImportBooleanModel(genes_list_filename,
+            genes_names_list, network_dictionary, unused_genes, network_as_list, genes_non_sort = ImportBooleanModel(genes_list_filename,
                                                                                                      network_filename)
 
 
@@ -415,7 +416,7 @@ if __name__ == "__main__":
         #
         if event_visu == 'Run HELIOS':
             if all_initial_states_bool_visu:
-                flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModel(
+                flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
                     genes_names=genes_names_list, genes_network=network_dictionary, initial_state_number='all',
                     initial_state_choice=initial_state_selected,
                     model=boolean_model_selected, stimulus=boundary_model_selected, initial_state_genes=genes_selected,
@@ -426,15 +427,15 @@ if __name__ == "__main__":
                        boundary_model_selected, network, initial_states, stable_states, data)
 
             elif subset_initial_states_bool_visu:
-                flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModel(
+                flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
                     genes_names=genes_names_list, genes_network=network_dictionary,
                     initial_state_number=number_initial_states, initial_state_choice=initial_state_selected,
                     model=boolean_model_selected, stimulus=boundary_model_selected, initial_state_genes=genes_selected,
                     KO_genes=KO_genes_selected, OA_genes=OA_genes_selected)
 
-                resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename, network_filename,
-                       genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
-                       boundary_model_selected, network, initial_states, stable_states, data)
+                # resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename, network_filename,
+                #        genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
+                #        boundary_model_selected, network, initial_states, stable_states, data)
 
             else:
                 sg.Popup(
@@ -483,7 +484,7 @@ if __name__ == "__main__":
         window_graph = sg.Window('Interaction Graph',
                            layout_graph, finalize=True)
 
-        fig = drawGraph(genes_names_list,network_as_list)
+        fig = drawGraph(genes_non_sort,network_as_list,flow)
         # add the plot to the window
         fig_canvas_agg = draw_figure(window_graph['-CANVAS-'].TKCanvas, fig)
         fig.canvas.callbacks.connect('pick_event', on_pick)

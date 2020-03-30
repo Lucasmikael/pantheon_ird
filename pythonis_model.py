@@ -68,6 +68,7 @@ def ImportBooleanModel(genes_list_file, network_structure_file, nb_columns_genes
     genes_network = {}
     genes_network_for_gui = []
     used_genes = []
+    genes_list_nonsort = []
 
     if (network_headers):
         del network_table[0]  # remove the header line if there is one
@@ -105,10 +106,12 @@ def ImportBooleanModel(genes_list_file, network_structure_file, nb_columns_genes
     absent_genes = list(set(genes_names) - set(used_genes))
 
     present_genes = list(set(used_genes))
+    genes_list_nonsort  = present_genes
     present_genes.sort()
     genes_network_for_gui.sort()
+    print(genes_list_nonsort)
 
-    return present_genes, genes_network, absent_genes, genes_network_for_gui
+    return present_genes, genes_network, absent_genes, genes_network_for_gui, genes_list_nonsort
 
 
 def InitializeState(genes_names, initial_state_choice='random', initial_state_genes=['foo']):
@@ -363,7 +366,7 @@ def HarvestStableStates(genes_names, genes_network, state_flow_network, verbose=
 
     if len(state_flow_network) == 0:
         print('\n invalid state flow network (empty) - ending computation')
-        return false
+        return False
 
     elif len(state_flow_network) == 1:  # only a single stable state in the flow
         for k in state_flow_network.keys():

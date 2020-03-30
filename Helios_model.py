@@ -10,58 +10,81 @@ import networkx as nx
 
 
 
-# # Path des fichiers en Import
-# genes_list_filename = "l_gnp-190515.txt"
-# network_filename = "jeu_essai_helios.txt"
-#
-# # Values en dur pour le run du modèle booléen
-# boolean_model_selected = "logical"
-# boundary_model_selected = "transient"
-# initial_state_selected = "random"
-# number_initial_states = "1"
-# KO_genes_selected = ['foo']
-# OA_genes_selected = ['foo']
-# genes_selected = ['foo']
-#
-# aretes = []
-
-#
-# genes_names_list, network_dictionary, unused_genes, network_as_list = ImportBooleanModel(genes_list_filename,network_filename)
-
-
-def drawGraph(genes_names_list,network_as_list):
+def drawGraph(genes_names_list,network_as_list, flow) :
     G = nx.MultiDiGraph()
 
 
-    G.add_nodes_from(genes_names_list)
-    val_map = {'ARR23': 1.0,'CRF2': 0.5714285714285714}
+    # G.add_nodes_from(genes_names_list)
+    # val_map = {'ARR23': "v"}
+    #
+    # values = [val_map.get(node, "o") for node in G.nodes()]
 
-    values = [val_map.get(node, 0.85) for node in G.nodes()]
+
+
+
+    positive_gene, negative_gene,normal_gene = getAutoregulate(network_as_list,genes_names_list)
+
+    G = addNodes(positive_gene,negative_gene,normal_gene, G)
+    G = addEdges(network_as_list, G)
+
+    # val_map = {'ARR23': "v"}
+    #
+    # values = [val_map.get(node, "o") for node in G.nodes()]
+
+
+    source, target, value_source = getFlow1 (flow)
+
+
+
+    activation_table = activationFlowTable (value_source, genes_names_list)
+    print(activation_table)
 
     #ajout des aretes et des noeuds
+
     for i in range (len(network_as_list)):
+        duet = "0"
         gene_source = network_as_list[i][0]
         gene_target = network_as_list[i][2]
         interaction = network_as_list[i][1]
-        G.add_edge(gene_source, gene_target, arrowstyle = interaction)
+        for k in range (len(network_as_list)) :
+             if network_as_list[k][0] == gene_target and network_as_list[k][2] == gene_source :
+                duet = "1"
+        G.add_edge(gene_source, gene_target, arrowstyle = interaction, duet = duet)
 
-    # if gene_source not in G.nodes :
-    #     if gene_target == gene_source :
-    #         G.add_node(gene_source, regulation = "auto")
-    #     else:
-    #         G.add_node(gene_source, regulation = "none")
-
-    print(G.adj)
 
     pos = nx.circular_layout(G)
-    nx.draw_networkx_nodes(G, pos, node_size=1500, node_color= values)
+
+    for node in G.nodes(data=True):
+        print(node[0], ": ",node[1]['forme'])
+        if node[1]['forme'] == "1":
+            node_shape = "^"
+        if node[1]['forme'] == "-1":
+            node_shape = "v"
+        else :
+            node_shape = "o"
+        nx.draw_networkx_nodes(G, pos, nodelist= [node[0]], node_size=1500, node_shape = node_shape)
+
+
+
     nx.draw_networkx_labels(G, pos)
     for edge in G.edges(data=True):
         if edge[2]['arrowstyle'] == "-1":
             arrowstyle = "-["
-        else :
+        if edge[2]['arrowstyle'] == "1":
             arrowstyle = "-|>"
-        nx.draw_networkx_edges(G, pos, edgelist=[(edge[0],edge[1])], arrowstyle = arrowstyle, node_size=1900)
+        if edge[2]['duet'] == "1":
+            form_arrow = 'arc3, rad = 0.2'
+        if edge[2]['duet'] == "0":
+            form_arrow = 'arc3, rad = 0.0'
+        for i in range (len(activation_table)):
+            if activation_table[i][0] == edge[0]:
+                if activation_table[i][1] == 1:
+                    activateedge = "r"
+                    print(activateedge)
+                else:
+                    activateedge = "b"
+                    print(activateedge)
+        nx.draw_networkx_edges(G, pos, edgelist=[(edge[0],edge[1])], arrowstyle = arrowstyle, node_size=1900, connectionstyle=form_arrow, edge_color= activateedge)
     # plt.show()
 
     plt.gca().yaxis.set_minor_formatter(NullFormatter())
@@ -71,8 +94,103 @@ def drawGraph(genes_names_list,network_as_list):
 
 
     return fig
-# figure= fig.bbox.bounds
 
+
+# def stateActiveInteraction (flow) :
+
+
+def activationFlowTable (value_source, genes_name_list):
+    all_values = []
+    for i in range(len(genes_name_list)):
+        pair_values = []
+        pair_values.append(genes_name_list[i])
+        pair_values.append(value_source[i])
+        all_values.append(pair_values)
+
+    print(all_values)
+    return all_values
+
+
+
+
+
+def getFlow1 (flow):
+    for key, value in flow.items():
+        value = 0
+        value_source = []
+        all_values = []
+        source = key
+        target = value
+        print ("cle : ",source)
+        print("valeur : ", target)
+        value += 1
+        for number in source :
+            value_source.append(number)
+        if value == 1 :
+            return source, target, value_source
+
+
+
+
+def getAutoregulate(network_as_list, genes_names_list):
+    positive_gene = []
+    negative_gene = []
+    normal_gene = []
+
+    for i in range (len(network_as_list)):
+        gene_source = network_as_list[i][0]
+        gene_target = network_as_list[i][2]
+        interaction = network_as_list[i][1]
+        if gene_target == gene_source:
+            if interaction == "1":
+                positive_gene.append(gene_source)
+
+            else :
+                negative_gene.append(gene_source)
+
+    for gene in genes_names_list:
+        if gene not in positive_gene and gene not in negative_gene:
+            normal_gene.append(gene)
+
+
+
+
+
+
+    return positive_gene, negative_gene,normal_gene
+
+def addEdges(network_as_list, G):
+    for i in range (len(network_as_list)):
+        duet = "0"
+    gene_source = network_as_list[i][0]
+    gene_target = network_as_list[i][2]
+    interaction = network_as_list[i][1]
+    for k in range (len(network_as_list)) :
+        if network_as_list[k][0] == gene_target and network_as_list[k][2] == gene_source :
+            duet = "1"
+    G.add_edge(gene_source, gene_target, arrowstyle = interaction, duet = duet)
+
+    return G
+
+
+def addNodes(positive_gene,negative_gene,normal_gene, G):
+    if len(positive_gene) != 0:
+        interaction = "1"
+        for i in range (len(positive_gene)):
+            G.add_node(positive_gene[i], forme = interaction)
+
+
+    if len(normal_gene) != 0:
+        interaction = "0"
+        for i in range (len(normal_gene)):
+            G.add_node(normal_gene[i], forme = interaction)
+
+    if len(negative_gene) != 0:
+        interaction = "-1"
+        for i in range (len(negative_gene)):
+            G.add_node(negative_gene[i], forme = interaction)
+
+    return G
 # ------------------------------- END OF YOUR MATPLOTLIB CODE -------------------------------
 
 # ------------------------------- Beginning of Matplotlib helper code -----------------------
@@ -91,24 +209,3 @@ def on_pick(event):
     ind = event.ind
     print ('Artist picked:', event.artist)
 
-# layout = [[sg.Canvas(size=(640, 480), key='-CANVAS-')]]
-#
-#
-# # define the window layout
-# # layout = [[sg.Text('Plot test', font='Any 18')],
-# #           [sg.Canvas(size=(figure), key='canvas')]]
-# #
-# # # create the form and show it without the plot
-# window = sg.Window('Interaction Graph',
-#                    layout, finalize=True)
-#
-# fig = drawGraph(genes_names_list,network_as_list)
-# # add the plot to the window
-# fig_canvas_agg = draw_figure(window['-CANVAS-'].TKCanvas, fig)
-# fig.canvas.callbacks.connect('pick_event', on_pick)
-#
-# canvas_elem = window['-CANVAS-']
-# canvas = canvas_elem.TKCanvas
-# event, values = window.read()
-#
-# window.close()
