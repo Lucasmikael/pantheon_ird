@@ -371,7 +371,13 @@ if __name__ == "__main__":
                                         ],
                                 title='Predict System Fates', title_color='#e4e4e4', background_color='#343434',
                                 relief=sg.RELIEF_GROOVE)],
-                      [sg.Text('', background_color='#343434')]]
+                      [sg.Text('', background_color='#343434')],
+                [sg.Frame(layout=[
+                        [sg.Button('Add Node'), sg.Button('Add Interaction')]],
+                  title='Add element to graph', title_color='#e4e4e4',
+                  background_color='#343434', relief=sg.RELIEF_GROOVE)],
+                [sg.Text('', background_color='#343434')]]
+
 
         layout_visu = [
             [sg.Column(col_visu1, background_color='#343434'), sg.Column(col_visu2, background_color='#343434'),
@@ -384,63 +390,135 @@ if __name__ == "__main__":
         window_visu = sg.Window("Initialize Network", alpha_channel=0.95, layout=layout_visu)
 
 
-
-        event_visu, values_visu = window_visu.Read()
-
-        # catch all parameters from the GUI
-        genes_selected = values_visu[0]
-        interactions_selected = values_visu[1]
-        boolean_model_selected = values_visu[2]
-        boundary_model_selected = values_visu[3]
-        initial_state_selected = values_visu[4]
-        all_initial_states_bool_visu = values_visu[5]
-        subset_initial_states_bool_visu = values_visu[6]
-        number_initial_states = values_visu[7]
-        KO_type_selected = values_visu[8]
-        if KO_type_selected != 'none':
-            KO_genes_selected = values_visu[9]
-            KO_genes_selected = KO_genes_selected.rsplit(',')
-        else:
-            KO_genes_selected = ['foo']
-        OA_type_selected = values_visu[10]
-        if OA_type_selected != 'none':
-            OA_genes_selected = values_visu[11]
-            OA_genes_selected = OA_genes_selected.rsplit(',')
-        else:
-            OA_genes_selected = ['foo']
+        ###########Execution visu##############
 
 
-        # launch modules or exit depending on button pushed
-        # if event_visu is None or event_visu == 'Exit':
-        #     print("break")
-        #
-        if event_visu == 'Run HELIOS':
-            if all_initial_states_bool_visu:
-                flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
-                    genes_names=genes_names_list, genes_network=network_dictionary, initial_state_number='all',
-                    initial_state_choice=initial_state_selected,
-                    model=boolean_model_selected, stimulus=boundary_model_selected, initial_state_genes=genes_selected,
-                    KO_genes=KO_genes_selected, OA_genes=OA_genes_selected)
+        nodewindow_active = False
+        interactionwindow_active = False
 
-                resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename, network_filename,
-                       genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
-                       boundary_model_selected, network, initial_states, stable_states, data)
 
-            elif subset_initial_states_bool_visu:
-                flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
-                    genes_names=genes_names_list, genes_network=network_dictionary,
-                    initial_state_number=number_initial_states, initial_state_choice=initial_state_selected,
-                    model=boolean_model_selected, stimulus=boundary_model_selected, initial_state_genes=genes_selected,
-                    KO_genes=KO_genes_selected, OA_genes=OA_genes_selected)
+        while True :
 
-                # resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename, network_filename,
-                #        genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
-                #        boundary_model_selected, network, initial_states, stable_states, data)
+            event_visu, values_visu = window_visu.Read()
 
+
+            # catch all parameters from the GUI
+            genes_selected = values_visu[0]
+            interactions_selected = values_visu[1]
+            boolean_model_selected = values_visu[2]
+            boundary_model_selected = values_visu[3]
+            initial_state_selected = values_visu[4]
+            all_initial_states_bool_visu = values_visu[5]
+            subset_initial_states_bool_visu = values_visu[6]
+            number_initial_states = values_visu[7]
+            KO_type_selected = values_visu[8]
+            if KO_type_selected != 'none':
+                KO_genes_selected = values_visu[9]
+                KO_genes_selected = KO_genes_selected.rsplit(',')
             else:
-                sg.Popup(
-                    'Please select value for number of initial states ( <<all>> or enter numerical value ) and run PYTHONIS again',
-                    no_titlebar=True, background_color='#343434')
+                KO_genes_selected = ['foo']
+            OA_type_selected = values_visu[10]
+            if OA_type_selected != 'none':
+                OA_genes_selected = values_visu[11]
+                OA_genes_selected = OA_genes_selected.rsplit(',')
+            else:
+                OA_genes_selected = ['foo']
+
+
+            # launch modules or exit depending on button pushed
+            if event_visu is None or event_visu == 'Exit':
+                print("break")
+
+            if event_visu == 'Run HELIOS':
+                if all_initial_states_bool_visu:
+                    flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
+                        genes_names=genes_names_list, genes_network=network_dictionary, initial_state_number='all',
+                        initial_state_choice=initial_state_selected,
+                        model=boolean_model_selected, stimulus=boundary_model_selected, initial_state_genes=genes_selected,
+                        KO_genes=KO_genes_selected, OA_genes=OA_genes_selected)
+
+                    resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename, network_filename,
+                           genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
+                           boundary_model_selected, network, initial_states, stable_states, data)
+
+                elif subset_initial_states_bool_visu:
+                    flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
+                        genes_names=genes_names_list, genes_network=network_dictionary,
+                        initial_state_number=number_initial_states, initial_state_choice=initial_state_selected,
+                        model=boolean_model_selected, stimulus=boundary_model_selected, initial_state_genes=genes_selected,
+                        KO_genes=KO_genes_selected, OA_genes=OA_genes_selected)
+
+                    # resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename, network_filename,
+                    #        genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
+                    #        boundary_model_selected, network, initial_states, stable_states, data)
+
+                else:
+                    sg.Popup(
+                        'Please select value for number of initial states ( <<all>> or enter numerical value ) and run PYTHONIS again',
+                        no_titlebar=True, background_color='#343434')
+
+                layout_graph = [[sg.Canvas(size=(640, 480), key='-CANVAS-')]]
+
+                # define the window layout
+                # layout = [[sg.Text('Plot test', font='Any 18')],
+                #           [sg.Canvas(size=(figure), key='canvas')]]
+                #
+                # # create the form and show it without the plot
+                window_graph = sg.Window('Interaction Graph',
+                                         layout_graph, finalize=True)
+
+                fig = drawGraph(genes_non_sort, network_as_list, flow)
+                # add the plot to the window
+                fig_canvas_agg = draw_figure(window_graph['-CANVAS-'].TKCanvas, fig)
+                fig.canvas.callbacks.connect('pick_event', on_pick)
+
+                canvas_elem = window_graph['-CANVAS-']
+                canvas = canvas_elem.TKCanvas
+                event, values = window_graph.read()
+
+                window_graph.close()
+
+            if not nodewindow_active and event_visu == 'Add Node':
+                nodewindow_active = True
+
+                layout_graph = [[sg.InputText(size=(10, 1), default_text='1')]]
+
+                # define the window layout
+                # layout = [[sg.Text('Plot test', font='Any 18')],
+                #           [sg.Canvas(size=(figure), key='canvas')]]
+                #
+                # # create the form and show it without the plot
+                nodewindow_active = sg.Window('Node/Interaction',
+                                         layout_graph, finalize=True)
+
+
+
+                event, values = nodewindow_active.read()
+
+                nodewindow_active.close()
+                nodewindow_active = False
+
+
+            if not interactionwindow_active and event_visu == 'Add Interaction' :
+
+                interactionwindow_active = True
+
+                layout_graph = [[sg.InputText(size=(10, 1), default_text='1')]]
+
+                # define the window layout
+                # layout = [[sg.Text('Plot test', font='Any 18')],
+                #           [sg.Canvas(size=(figure), key='canvas')]]
+                #
+                # # create the form and show it without the plot
+                interactionwindow_active = sg.Window('Add Interaction',
+                                         layout_graph, finalize=True)
+
+
+
+                event, values = interactionwindow_active.read()
+
+                interactionwindow_active.close()
+                interactionwindow_active = False
 
         window_visu.Close()
 

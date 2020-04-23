@@ -14,30 +14,17 @@ def drawGraph(genes_names_list,network_as_list, flow) :
     G = nx.MultiDiGraph()
 
 
-    # G.add_nodes_from(genes_names_list)
-    # val_map = {'ARR23': "v"}
-    #
-    # values = [val_map.get(node, "o") for node in G.nodes()]
-
-
-
 
     positive_gene, negative_gene,normal_gene = getAutoregulate(network_as_list,genes_names_list)
 
     G = addNodes(positive_gene,negative_gene,normal_gene, G)
     G = addEdges(network_as_list, G)
-
-    # val_map = {'ARR23': "v"}
-    #
-    # values = [val_map.get(node, "o") for node in G.nodes()]
-
-
     source, target, value_source = getFlow1 (flow)
 
 
 
     activation_table = activationFlowTable (value_source, genes_names_list)
-    print(activation_table)
+
 
     #ajout des aretes et des noeuds
 
@@ -208,4 +195,3 @@ def on_pick(event):
     x, y = artist.get_xdata(), artist.get_ydata()
     ind = event.ind
     print ('Artist picked:', event.artist)
-
