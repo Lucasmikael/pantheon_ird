@@ -8,25 +8,32 @@ matplotlib.use('TkAgg')
 from pythonis_model import *
 import networkx as nx
 
+def createListPanelGraph(flow):
+    list_panel= []
+    for i in range (len(flow)):
+        list_panel.append(i)
+    print(list_panel)
+    return list_panel
 
 
-def drawGraph(genes_names_list,network_as_list, flow) :
+def drawGraph(genes_names_list,network_as_list, flow, graph_selected,layout_selected):
+
+
     G = nx.MultiDiGraph()
 
 
 
-    positive_gene, negative_gene,normal_gene = getAutoregulate(network_as_list,genes_names_list)
 
-    G = addNodes(positive_gene,negative_gene,normal_gene, G)
-    G = addEdges(network_as_list, G)
-    source, target, value_source = getFlow1 (flow)
-
+    # positive_gene, negative_gene,normal_gene = getAutoregulate(network_as_list,genes_names_list)
+    value_source = getFlow(flow,graph_selected)
+    global_gene_state = getRegulationActivation(network_as_list, genes_names_list, value_source)
 
 
-    activation_table = activationFlowTable (value_source, genes_names_list)
+    # activation_table = activationFlowTable (value_source, genes_names_list)
 
 
     #ajout des aretes et des noeuds
+    G = addNodes(global_gene_state, G)
 
     for i in range (len(network_as_list)):
         duet = "0"
@@ -39,17 +46,21 @@ def drawGraph(genes_names_list,network_as_list, flow) :
         G.add_edge(gene_source, gene_target, arrowstyle = interaction, duet = duet)
 
 
-    pos = nx.circular_layout(G)
+    pos = selectLayout(layout_selected, G)
 
     for node in G.nodes(data=True):
-        print(node[0], ": ",node[1]['forme'])
+        print(node[0], ": ",node[1]['active_state'])
         if node[1]['forme'] == "1":
             node_shape = "^"
         if node[1]['forme'] == "-1":
             node_shape = "v"
-        else :
+        if node[1]['forme'] == "0":
             node_shape = "o"
-        nx.draw_networkx_nodes(G, pos, nodelist= [node[0]], node_size=1500, node_shape = node_shape)
+        if node[1]['active_state'] == 0:
+            color = "blue"
+        if node[1]['active_state'] == 1:
+            color = "red"
+        nx.draw_networkx_nodes(G, pos, nodelist= [node[0]], node_size=1500, node_shape = node_shape, node_color = color)
 
 
 
@@ -63,88 +74,74 @@ def drawGraph(genes_names_list,network_as_list, flow) :
             form_arrow = 'arc3, rad = 0.2'
         if edge[2]['duet'] == "0":
             form_arrow = 'arc3, rad = 0.0'
-        for i in range (len(activation_table)):
-            if activation_table[i][0] == edge[0]:
-                if activation_table[i][1] == 1:
-                    activateedge = "r"
-                    print(activateedge)
-                else:
-                    activateedge = "b"
-                    print(activateedge)
-        nx.draw_networkx_edges(G, pos, edgelist=[(edge[0],edge[1])], arrowstyle = arrowstyle, node_size=1900, connectionstyle=form_arrow, edge_color= activateedge)
+
+        nx.draw_networkx_edges(G, pos, edgelist=[(edge[0],edge[1])], arrowstyle = arrowstyle, node_size=1900, connectionstyle=form_arrow)
     # plt.show()
 
     plt.gca().yaxis.set_minor_formatter(NullFormatter())
     plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0.25,
                         wspace=0.35)
     fig = plt.gcf()
-
-
-    return fig
-
-
-# def stateActiveInteraction (flow) :
-
-
-def activationFlowTable (value_source, genes_name_list):
-    all_values = []
-    for i in range(len(genes_name_list)):
-        pair_values = []
-        pair_values.append(genes_name_list[i])
-        pair_values.append(value_source[i])
-        all_values.append(pair_values)
-
-    print(all_values)
-    return all_values
+    return fig, G
 
 
 
 
-
-def getFlow1 (flow):
+def getFlow(flow,graph_selected):
+    value_to_reach = graph_selected + 1
+    value_running = 0
     for key, value in flow.items():
-        value = 0
+        #Cle du dictionnaire
         value_source = []
-        all_values = []
+
         source = key
         target = value
         print ("cle : ",source)
         print("valeur : ", target)
-        value += 1
+        value_running += 1
         for number in source :
             value_source.append(number)
-        if value == 1 :
-            return source, target, value_source
+        if value_running == value_to_reach :
+            print("source",source)
+            print("value source", value_source)
+            print("ca plante ici")
+            return value_source
 
 
+def getRegulationActivation(network_as_list, genes_names_list, value_source):
+        positive_gene = []
+        negative_gene = []
+        global_gene_state = []
 
 
-def getAutoregulate(network_as_list, genes_names_list):
-    positive_gene = []
-    negative_gene = []
-    normal_gene = []
+        for i in range(len(network_as_list)):
+            gene_source = network_as_list[i][0]
+            gene_target = network_as_list[i][2]
+            interaction = network_as_list[i][1]
+            if gene_target == gene_source :
+                if interaction == "1":
+                    positive_gene.append(gene_source)
 
-    for i in range (len(network_as_list)):
-        gene_source = network_as_list[i][0]
-        gene_target = network_as_list[i][2]
-        interaction = network_as_list[i][1]
-        if gene_target == gene_source:
-            if interaction == "1":
-                positive_gene.append(gene_source)
+                else:
+                    negative_gene.append(gene_source)
 
+        for i in range (len(genes_names_list)) :
+            state_gene = []
+            gene = genes_names_list[i]
+            activation = value_source[i]
+            if gene in positive_gene:
+                regulation = "1"
+            if gene in negative_gene:
+                regulation = "-1"
             else :
-                negative_gene.append(gene_source)
+                regulation = "0"
+            state_gene.append(gene)
+            state_gene.append(activation)
+            state_gene.append(regulation)
+            global_gene_state.append(state_gene)
+        print(global_gene_state)
+        return global_gene_state
 
-    for gene in genes_names_list:
-        if gene not in positive_gene and gene not in negative_gene:
-            normal_gene.append(gene)
-
-
-
-
-
-
-    return positive_gene, negative_gene,normal_gene
 
 def addEdges(network_as_list, G):
     for i in range (len(network_as_list)):
@@ -160,24 +157,21 @@ def addEdges(network_as_list, G):
     return G
 
 
-def addNodes(positive_gene,negative_gene,normal_gene, G):
-    if len(positive_gene) != 0:
-        interaction = "1"
-        for i in range (len(positive_gene)):
-            G.add_node(positive_gene[i], forme = interaction)
+def addNodes(global_gene_state, G):
 
-
-    if len(normal_gene) != 0:
-        interaction = "0"
-        for i in range (len(normal_gene)):
-            G.add_node(normal_gene[i], forme = interaction)
-
-    if len(negative_gene) != 0:
-        interaction = "-1"
-        for i in range (len(negative_gene)):
-            G.add_node(negative_gene[i], forme = interaction)
-
+    for i in range (len(global_gene_state)):
+        gene_name = global_gene_state[i][0]
+        activation = global_gene_state[i][1]
+        regulation = global_gene_state[i][2]
+        G.add_node(gene_name, forme = regulation, active_state = activation)
     return G
+
+def selectLayout(layout_selected, G):
+    if layout_selected == 'circular_layout':
+        pos = nx.circular_layout(G)
+    if layout_selected == 'spring_layout':
+        pos= nx.spring_layout(G)
+    return pos
 # ------------------------------- END OF YOUR MATPLOTLIB CODE -------------------------------
 
 # ------------------------------- Beginning of Matplotlib helper code -----------------------
