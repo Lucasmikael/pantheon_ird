@@ -10,7 +10,6 @@ def createListPanelGraph(flow):
     list_panel= []
     for i in range (len(flow)):
         list_panel.append(i)
-    print(list_panel)
     return list_panel
 
 
@@ -34,54 +33,48 @@ def drawGraph(genes_names_list,network_as_list, flow, graph_selected,layout_sele
     G = addNodes(global_gene_state, G)
     G = addEdges(network_as_list, G)
 
-    # for i in range (len(network_as_list)):
-    #     duet = "0"
-    #     gene_source = network_as_list[i][0]
-    #     gene_target = network_as_list[i][2]
-    #     interaction = network_as_list[i][1]
-    #     for k in range (len(network_as_list)) :
-    #          if network_as_list[k][0] == gene_target and network_as_list[k][2] == gene_source :
-    #             duet = "1"
-    #     G.add_edge(gene_source, gene_target, arrowstyle = interaction, duet = duet)
 
+    fig, G = drawFig(layout_selected, G)
 
-    pos = selectLayout(layout_selected, G)
-
-    for node in G.nodes(data=True):
-        print(node[0], ": ",node[1]['active_state'])
-        if node[1]['forme'] == "1":
-            node_shape = "^"
-        if node[1]['forme'] == "-1":
-            node_shape = "v"
-        if node[1]['forme'] == "0":
-            node_shape = "o"
-        if node[1]['active_state'] == 0:
-            color = "blue"
-        if node[1]['active_state'] == 1:
-            color = "red"
-        nx.draw_networkx_nodes(G, pos, nodelist= [node[0]], node_size=1500, node_shape = node_shape, node_color = color)
-
-
-
-    nx.draw_networkx_labels(G, pos)
-    for edge in G.edges(data=True):
-        if edge[2]['arrowstyle'] == "-1":
-            arrowstyle = "-["
-        if edge[2]['arrowstyle'] == "1":
-            arrowstyle = "-|>"
-        if edge[2]['duet'] == "1":
-            form_arrow = 'arc3, rad = 0.2'
-        if edge[2]['duet'] == "0":
-            form_arrow = 'arc3, rad = 0.0'
-
-        nx.draw_networkx_edges(G, pos, edgelist=[(edge[0],edge[1])], arrowstyle = arrowstyle, node_size=1900, connectionstyle=form_arrow)
-    # plt.show()
-
-    plt.gca().yaxis.set_minor_formatter(NullFormatter())
-    plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0.25,
-                        wspace=0.35)
-    fig = plt.gcf()
     return fig, G
+
+def drawFig(layout_selected, G):
+        pos = selectLayout(layout_selected, G)
+
+        for node in G.nodes(data=True):
+            if node[1]['forme'] == "1":
+                node_shape = "^"
+            if node[1]['forme'] == "-1":
+                node_shape = "v"
+            if node[1]['forme'] == "0":
+                node_shape = "o"
+            if node[1]['active_state'] == 0 :
+                color = "blue"
+            if node[1]['active_state'] == 1 :
+                color = "red"
+            nx.draw_networkx_nodes(G, pos, nodelist= [node[0]], node_size=1500, node_shape = node_shape, node_color = color)
+
+
+
+        nx.draw_networkx_labels(G, pos)
+        for edge in G.edges(data=True):
+            if edge[2]['arrowstyle'] == "-1":
+                arrowstyle = "-["
+            if edge[2]['arrowstyle'] == "1":
+                arrowstyle = "-|>"
+            if edge[2]['duet'] == "1":
+                form_arrow = 'arc3, rad = 0.2'
+            if edge[2]['duet'] == "0":
+                form_arrow = 'arc3, rad = 0.0'
+
+            nx.draw_networkx_edges(G, pos, edgelist=[(edge[0],edge[1])], arrowstyle = arrowstyle, node_size=1900, connectionstyle=form_arrow)
+        # plt.show()
+
+        plt.gca().yaxis.set_minor_formatter(NullFormatter())
+        plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0.25,
+                            wspace=0.35)
+        fig = plt.gcf()
+        return fig, G
 
 
 
@@ -98,7 +91,6 @@ def getFlow(flow,graph_selected):
             for number in source:
                 value_source.append(number)
             return value_source
-
 
 def getRegulationActivation(network_as_list, genes_names_list, value_source):
         positive_gene = []
@@ -131,7 +123,6 @@ def getRegulationActivation(network_as_list, genes_names_list, value_source):
             state_gene.append(activation)
             state_gene.append(regulation)
             global_gene_state.append(state_gene)
-        print(global_gene_state)
         return global_gene_state
 
 

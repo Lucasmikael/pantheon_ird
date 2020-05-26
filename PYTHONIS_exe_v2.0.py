@@ -18,7 +18,7 @@ from pythonis_model import *
 from random_network import *
 from Helios_model import *
 from Helios_Refactor_Pythonis import *
-from Helios_data import *
+from Helios_IO import *
 
 
 # def fonctionMain(working_directory, genes_list_file, network_structure_file, nb_columns_genes=1, name_index=1,
@@ -323,7 +323,7 @@ if __name__ == "__main__":
             genes_names_list, network_dictionary, unused_genes, network_as_list, genes_non_sort = ImportBooleanModel(genes_list_filename,
                                                                                                      network_filename)
 
-
+        genes_names_list, network_dictionary = addElement(network_dictionary, genes_names_list)
         col_visu1 = [[sg.Text('Input : List of genes', text_color='#e4e4e4', background_color='#343434')],
                       [sg.Listbox(values=genes_names_list,
                                   select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(20, 35),
@@ -554,7 +554,41 @@ if __name__ == "__main__":
                     saveData(network_as_list,flow, genes_names_list)
 
                 if event_graphs == "Load graph":
-                    openData()
+                    interaction_table, node_table = openData()
+                    list_panel_load = createListPanelGraph(node_table)
+                    importdata_active = False
+                    layout_load=[
+                        [sg.Button('Launch visu'), sg.Combo(list_panel_load), sg.Combo(layout_graph_drawing)]]
+                    window_load = sg.Window('Load graph',
+                                             layout_load, finalize=True)
+
+                    event_load, values_load = window_load.Read()
+                    graph_selected = values_load[0]
+                    layout_selected = values_load[1]
+
+                    if event_load == "Launch visu":
+                        layout_graph_load = [[sg.Canvas(size=(640, 480), key='-CANVAS-')]]
+
+                        # define the window layout
+                        # layout = [[sg.Text('Plot test', font='Any 18')],
+                        #           [sg.Canvas(size=(figure), key='canvas')]]
+                        #
+                        # # create the form and show it without the plot
+                        window_graph_load= sg.Window('Interaction Graph',
+                                                 layout_graph_load, finalize=True)
+
+                        # fig, G = drawGraph(genes_non_sort, network_as_list, flow, graph_selected, layout_selected)
+                        fig,G = drawLoadGraph(layout_selected,interaction_table, node_table, graph_selected)
+                        # add the plot to the window
+
+                        fig_canvas_agg = draw_figure(window_graph_load['-CANVAS-'].TKCanvas, fig)
+                        fig.canvas.callbacks.connect('pick_event', on_pick)
+
+                        canvas_elem = window_graph_load['-CANVAS-']
+                        canvas = canvas_elem.TKCanvas
+                        event, values = window_graph_load.read()
+                        window_graph_load.close()
+
 
                 if not nodewindow_active and event_graphs == 'Add Node':
                     nodewindow_active = True
