@@ -1,8 +1,6 @@
 from matplotlib.ticker import NullFormatter  # useful for `logit` scale
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import PySimpleGUI as sg
 import matplotlib
 matplotlib.use('TkAgg')
 from pythonis_model import *
@@ -34,16 +32,17 @@ def drawGraph(genes_names_list,network_as_list, flow, graph_selected,layout_sele
 
     #ajout des aretes et des noeuds
     G = addNodes(global_gene_state, G)
+    G = addEdges(network_as_list, G)
 
-    for i in range (len(network_as_list)):
-        duet = "0"
-        gene_source = network_as_list[i][0]
-        gene_target = network_as_list[i][2]
-        interaction = network_as_list[i][1]
-        for k in range (len(network_as_list)) :
-             if network_as_list[k][0] == gene_target and network_as_list[k][2] == gene_source :
-                duet = "1"
-        G.add_edge(gene_source, gene_target, arrowstyle = interaction, duet = duet)
+    # for i in range (len(network_as_list)):
+    #     duet = "0"
+    #     gene_source = network_as_list[i][0]
+    #     gene_target = network_as_list[i][2]
+    #     interaction = network_as_list[i][1]
+    #     for k in range (len(network_as_list)) :
+    #          if network_as_list[k][0] == gene_target and network_as_list[k][2] == gene_source :
+    #             duet = "1"
+    #     G.add_edge(gene_source, gene_target, arrowstyle = interaction, duet = duet)
 
 
     pos = selectLayout(layout_selected, G)
@@ -93,18 +92,11 @@ def getFlow(flow,graph_selected):
     for key, value in flow.items():
         #Cle du dictionnaire
         value_source = []
-
         source = key
-        target = value
-        print ("cle : ",source)
-        print("valeur : ", target)
         value_running += 1
-        for number in source :
-            value_source.append(number)
         if value_running == value_to_reach :
-            print("source",source)
-            print("value source", value_source)
-            print("ca plante ici")
+            for number in source:
+                value_source.append(number)
             return value_source
 
 
@@ -144,15 +136,16 @@ def getRegulationActivation(network_as_list, genes_names_list, value_source):
 
 
 def addEdges(network_as_list, G):
+
     for i in range (len(network_as_list)):
         duet = "0"
-    gene_source = network_as_list[i][0]
-    gene_target = network_as_list[i][2]
-    interaction = network_as_list[i][1]
-    for k in range (len(network_as_list)) :
-        if network_as_list[k][0] == gene_target and network_as_list[k][2] == gene_source :
-            duet = "1"
-    G.add_edge(gene_source, gene_target, arrowstyle = interaction, duet = duet)
+        gene_source = network_as_list[i][0]
+        gene_target = network_as_list[i][2]
+        interaction = network_as_list[i][1]
+        for k in range (len(network_as_list)) :
+             if network_as_list[k][0] == gene_target and network_as_list[k][2] == gene_source :
+                duet = "1"
+        G.add_edge(gene_source, gene_target, arrowstyle = interaction, duet = duet)
 
     return G
 
@@ -172,9 +165,8 @@ def selectLayout(layout_selected, G):
     if layout_selected == 'spring_layout':
         pos= nx.spring_layout(G)
     return pos
-# ------------------------------- END OF YOUR MATPLOTLIB CODE -------------------------------
 
-# ------------------------------- Beginning of Matplotlib helper code -----------------------
+# ------------------------------- Beginning of Matplotlib  -----------------------
 ######Ca c'est bon#########
 
 def draw_figure(canvas, figure, loc=(0, 0)):
@@ -182,7 +174,7 @@ def draw_figure(canvas, figure, loc=(0, 0)):
     figure_canvas_agg.draw()
     figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
     return figure_canvas_agg
-# ------------------------------- Beginning of GUI CODE -------------------------------
+# ------------------------------- Beginning of INTERACTIVE CODE -------------------------------
 def on_pick(event):
     artist = event.artist
     xmouse, ymouse = event.mouseevent.xdata, event.mouseevent.ydata

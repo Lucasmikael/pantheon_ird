@@ -548,8 +548,13 @@ if __name__ == "__main__":
                     canvas = canvas_elem.TKCanvas
                     event, values = window_graph.read()
                     window_graph.close()
+                    #canvas.delete('all')
 
+                if event_graphs == "Save graph":
+                    saveData(network_as_list,flow, genes_names_list)
 
+                if event_graphs == "Load graph":
+                    openData()
 
                 if not nodewindow_active and event_graphs == 'Add Node':
                     nodewindow_active = True
