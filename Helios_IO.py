@@ -103,14 +103,15 @@ def addNodesImport (node_table, graph_selected,G):
 
 
 
-def addElement(genes_network, genes_names_list) :
+def addElement(genes_network, genes_names_list, network_as_list) :
     regex = re.compile('[^a-zA-Z0-9 ]')
-    new_element = ["NEWELEMENT", "1", "ARR23"]
+    new_element = ["ARR23", "1", "NEWELEMENT"]
 
     source_gene, interaction, target_gene = new_element[0], new_element[1], new_element[2]
     source_gene, target_gene = regex.sub('.', source_gene), regex.sub('.', target_gene)
 
     print("source :", source_gene, " interaction", interaction," Target:",target_gene)
+    network_as_list.append([source_gene, interaction, target_gene])
     try:
         genes_network[source_gene].append([interaction, target_gene])
     except KeyError:
@@ -122,4 +123,4 @@ def addElement(genes_network, genes_names_list) :
         genes_names_list.append(target_gene)
     print(genes_names_list)
     print(genes_network)
-    return genes_names_list, genes_network
+    return genes_names_list, genes_network, network_as_list

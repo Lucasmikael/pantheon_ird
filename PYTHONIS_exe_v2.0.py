@@ -323,7 +323,7 @@ if __name__ == "__main__":
             genes_names_list, network_dictionary, unused_genes, network_as_list, genes_non_sort = ImportBooleanModel(genes_list_filename,
                                                                                                      network_filename)
 
-        genes_names_list, network_dictionary = addElement(network_dictionary, genes_names_list)
+        genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,network_as_list)
         col_visu1 = [[sg.Text('Input : List of genes', text_color='#e4e4e4', background_color='#343434')],
                       [sg.Listbox(values=genes_names_list,
                                   select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(20, 35),

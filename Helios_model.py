@@ -14,6 +14,7 @@ def createListPanelGraph(flow):
 
 
 def drawGraph(genes_names_list,network_as_list, flow, graph_selected,layout_selected):
+    print(network_as_list)
 
 
     G = nx.MultiDiGraph()
