@@ -3,47 +3,46 @@ from Helios_model import *
 from pythonis_model import *
 import networkx as nx
 
-def saveData(network_as_list,flow, genes_names_list):
+
+def saveData(network_as_list, flow, genes_names_list):
     file = open("nodegraph.csv", 'w')
     interaction = 0
-    with file :
+    with file:
         writer = csv.writer(file)
-        for i in range (len(flow)):
+        for i in range(len(flow)):
             G = nx.MultiDiGraph()
             value_source = getFlow(flow, i)
             global_gene_state = getRegulationActivation(network_as_list, genes_names_list, value_source)
             G = addNodes(global_gene_state, G)
             G = addEdges(network_as_list, G)
-            if interaction == 0 :
+            if interaction == 0:
                 writer.writerow(["Interaction"])
                 for edge in G.edges(data=True):
                     source = edge[0]
                     target = edge[1]
                     arrow = edge[2]['arrowstyle']
                     duet = edge[2]['duet']
-                    writer.writerow([source,target,arrow,duet])
+                    writer.writerow([source, target, arrow, duet])
             interaction += 1
-            writer.writerow(["Etat",i])
+            writer.writerow(["Etat", i])
             for node in G.nodes(data=True):
-                name= node[0]
+                name = node[0]
                 form = node[1]['forme']
                 state = node[1]['active_state']
-                writer.writerow([name,form,state])
+                writer.writerow([name, form, state])
             writer.writerow(["Fin"])
 
 
-
-
 def openData():
-    file = open("nodegraph.csv","r")
-    reader = csv.reader(file, delimiter = ",")
+    file = open("nodegraph.csv", "r")
+    reader = csv.reader(file, delimiter=",")
     interaction = False
     state = False
     number_state = -1
     interaction_table = []
     node_table = []
 
-    for row in reader :
+    for row in reader:
         if row[0] == "Fin":
             node_table.append(node_state_table)
             state = False
@@ -54,7 +53,7 @@ def openData():
             number_state = row[1]
         # if row[0] == "Fin":
         #     node_table.append(node_state_table)
-        if state :
+        if state:
             row_table = []
             row_table.append(row[0])
             row_table.append(row[1])
@@ -63,7 +62,7 @@ def openData():
         if row[0] == "Etat":
             interaction = False
             state = True
-        if interaction :
+        if interaction:
             row_table = []
             row_table.append(row[0])
             row_table.append(row[1])
@@ -75,52 +74,34 @@ def openData():
     file.close()
     return interaction_table, node_table
 
-def drawLoadGraph(layout_selected, interaction_table, node_table, graph_selected):
-    G = nx.MultiDiGraph()
-    G = addNodesImport(node_table, graph_selected, G)
-    G = addEdgesImport(interaction_table,G)
-    fig, G = drawFig(layout_selected, G)
 
+def drawLoadGraph(layout_selected, interaction_table, node_table, graph_selected, color_activate_node="red",
+                  color_inactivate_node="blue", color_active_edge="darkorange", color_inactivate_edge="pink"):
+    G = nx.MultiDiGraph()
+    G, global_gene_state = addNodesImport(node_table, graph_selected, G)
+    G = addEdgesImport(interaction_table, G)
+    fig, G = drawFig(G, global_gene_state, layout_selected, color_activate_node, color_inactivate_node,
+                     color_active_edge, color_inactivate_edge)
     return fig, G
 
 
-
-
-
-def addEdgesImport(interaction_table,G):
+def addEdgesImport(interaction_table, G):
     for edge in interaction_table:
         G.add_edge(edge[0], edge[1], arrowstyle=edge[2], duet=edge[3])
         # print(edge[0],edge[1],edge[2],edge[3])
     return G
 
-def addNodesImport (node_table, graph_selected,G):
-    for graph in range (len(node_table)):
-        if graph == graph_selected :
+
+def addNodesImport(node_table, graph_selected, G):
+    global_gene_state = []
+    for graph in range(len(node_table)):
+        if graph == graph_selected:
             for node in range(len(node_table[graph])):
+                new_node = []
                 # print(node_table[graph][node][0],node_table[graph][node][1],node_table[graph][node][2])
-                G.add_node(node_table[graph][node][0], forme=node_table[graph][node][1], active_state=int(node_table[graph][node][2]))
-    return G
-
-
-
-def addElement(genes_network, genes_names_list, network_as_list) :
-    regex = re.compile('[^a-zA-Z0-9 ]')
-    new_element = ["ARR23", "1", "NEWELEMENT"]
-
-    source_gene, interaction, target_gene = new_element[0], new_element[1], new_element[2]
-    source_gene, target_gene = regex.sub('.', source_gene), regex.sub('.', target_gene)
-
-    print("source :", source_gene, " interaction", interaction," Target:",target_gene)
-    network_as_list.append([source_gene, interaction, target_gene])
-    try:
-        genes_network[source_gene].append([interaction, target_gene])
-    except KeyError:
-        genes_network[source_gene] = [[interaction, target_gene]]
-
-    if (source_gene) not in set(genes_names_list):
-        genes_names_list.append(source_gene)
-    if (target_gene) not in set(genes_names_list):
-        genes_names_list.append(target_gene)
-    print(genes_names_list)
-    print(genes_network)
-    return genes_names_list, genes_network, network_as_list
+                G.add_node(node_table[graph][node][0], forme=node_table[graph][node][1],
+                           active_state=int(node_table[graph][node][2]))
+                new_node.append(node_table[graph][node][0])
+                new_node.append(int(node_table[graph][node][2]))
+                global_gene_state.append(new_node)
+    return G, global_gene_state

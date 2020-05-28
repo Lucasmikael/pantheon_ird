@@ -155,7 +155,6 @@ def ComputeNextState(genes_names, genes_network, state_flow, model='logical', st
                                     state_flow[-1][genes_names.index(target_gene)] == 2):
                                 state_flow[-1][genes_names.index(target_gene)] = 3
 
-
         # set KO or overactivated genes to their constant values - do it in a single pass rather than checking during each previous computation
         for gene in genes_names:
             if gene in KO_genes:
@@ -197,13 +196,11 @@ def ComputeNextState(genes_names, genes_network, state_flow, model='logical', st
                     state_flow[-1][genes_names.index(source_gene)] = state_flow[-2][genes_names.index(
                         source_gene)]  # could have left the line blank as no other input will change the root genes
 
-
             # then we apply the proper regulation to their targets
 
             for [interaction, target_gene] in genes_network[source_gene]:
                 state_flow[-1][genes_names.index(target_gene)] += (
                         float(interaction) * float(state_flow[-2][genes_names.index(source_gene)]))
-
 
         # set KO or overactivated genes to their constant values - do it in a single pass rather than checking during each previous computation
         for gene in genes_names:
@@ -233,8 +230,6 @@ def ComputeNextState(genes_names, genes_network, state_flow, model='logical', st
 
     else:
         return False
-
-
 
     return state_flow
 
@@ -281,7 +276,6 @@ def HarvestStableStates(genes_names, genes_network, state_flow_network, verbose=
                 path.append(state)
                 explored_states.append(state)
                 count += 1
-
 
                 state = state_flow_network[state]
 
@@ -372,8 +366,8 @@ def HarvestStableStates(genes_names, genes_network, state_flow_network, verbose=
 
 
 def RunBooleanModelVisu(genes_names, genes_network, initial_state_number='all', initial_state_choice='random',
-                    initial_state_genes=['foo'],
-                    model='logical', stimulus='transient', verbose=True, KO_genes=['foo'], OA_genes=['foo']):
+                        initial_state_genes=['foo'],
+                        model='logical', stimulus='transient', verbose=True, KO_genes=['foo'], OA_genes=['foo']):
     """
     Run the chosen boolean model over the given network.
 
@@ -399,7 +393,6 @@ def RunBooleanModelVisu(genes_names, genes_network, initial_state_number='all', 
 
     Return a dictionary of all the state flow for the given initial state, a list of stable states sequences + size of attraction basin and either the starting state (run from a single state) or 'all_state_run' if running from all possible states
     """
-
     # note : keep track of gene name and respective state using genes_names.index('name_of_gene_of_interest') call
     # note : use np.vstack((array1,array2,...)) to add new state in the state flow
     # note : can use zero_row = np.zeros(len(genes_names)) to create a line of 0
@@ -449,7 +442,6 @@ def RunBooleanModelVisu(genes_names, genes_network, initial_state_number='all', 
         # keep user informed of the computation progress
         count += 1
 
-
         # if this state has not already been encountered previously in the flow, follow this path for a first iteration
         # otherwise skip to next possible initial state
         if not (tuple(start) in state_flow_network):
@@ -487,8 +479,6 @@ def RunBooleanModelVisu(genes_names, genes_network, initial_state_number='all', 
                 state_flow_network[tuple(state_flow[-2])] = tuple(state_flow[-1])
                 stop_flag = tuple(state_flow[-1]) in state_flow_network.keys()
 
-
-
     stable_states = HarvestStableStates(genes_names, genes_network, state_flow_network, verbose)
 
     # create the (stable state size, basin size) list - have to use isinstance check to avoid unique stable state size being estimated as the number of genes in them
@@ -501,8 +491,7 @@ def RunBooleanModelVisu(genes_names, genes_network, initial_state_number='all', 
 
     time_passed = (time.time() - start_time)
 
-
-    print (state_flow_network)
+    print(state_flow_network)
     if (initial_state_number == 'single') or (int(initial_state_number) <= 1):
         return state_flow_network, stable_states, starting_state, len(stable_states), len(initial_states), \
                len(genes_names), data, len(Flatten(list(genes_network.values()))) / 2, time_passed
