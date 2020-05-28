@@ -15,8 +15,8 @@ def createListPanelGraph(flow):
     return list_panel
 
 
-def drawGraph(genes_names_list, network_as_list, flow, genes_selected_visu, graph_selected, layout_selected, color_activate_node,
-              color_inactivate_node, color_active_edge, color_inactivate_edge, activate_widthedge):
+def drawGraph(genes_names_list, network_as_list, flow, graph_selected, layout_selected, color_activate_node,
+              color_inactivate_node, color_active_edge, color_inactivate_edge, activate_widthedge,genes_selected_visu):
     print("genes selctionnes : ", genes_selected_visu)
     G = nx.MultiDiGraph()
 
@@ -31,17 +31,17 @@ def drawGraph(genes_names_list, network_as_list, flow, genes_selected_visu, grap
     G = addNodes(global_gene_state, G)
     G = addEdges(network_as_list, G)
 
-    fig, G = drawFig(G,genes_selected_visu, global_gene_state, layout_selected, color_activate_node, color_inactivate_node,
-                     color_active_edge, color_inactivate_edge, activate_widthedge)
+    fig, G = drawFig(G, global_gene_state, layout_selected, color_activate_node, color_inactivate_node,
+                     color_active_edge, color_inactivate_edge, activate_widthedge, genes_selected_visu)
 
     return fig, G
 
 
-def drawFig(G, genes_visu_selected, global_gene_state, layout_selected, color_activate_node, color_inactivate_node, color_active_edge,
-            color_inactivate_edge, activate_widthedge):
+def drawFig(G, global_gene_state, layout_selected, color_activate_node, color_inactivate_node, color_active_edge,
+            color_inactivate_edge, activate_widthedge, genes_selected_visu):
     pos = selectLayout(G, layout_selected)
-
     for node in G.nodes(data=True):
+        transparency = 1
         if node[1]['forme'] == "1":
             node_shape = "^"
         if node[1]['forme'] == "-1":
@@ -52,7 +52,12 @@ def drawFig(G, genes_visu_selected, global_gene_state, layout_selected, color_ac
             color = color_inactivate_node
         if node[1]['active_state'] == 1:
             color = color = color_activate_node
-        nx.draw_networkx_nodes(G, pos, nodelist=[node[0]], node_size=1500, node_shape=node_shape, node_color=color)
+        if genes_selected_visu :
+            transparency = 0.5
+            for i in range(len(genes_selected_visu)):
+                if genes_selected_visu[i] == node[0]:
+                    transparency = 1
+        nx.draw_networkx_nodes(G, pos, nodelist=[node[0]], node_size=1500, node_shape=node_shape, node_color=color, alpha = transparency)
 
     nx.draw_networkx_labels(G, pos)
     for edge in G.edges(data=True):

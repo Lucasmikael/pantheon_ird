@@ -435,6 +435,7 @@ if __name__ == "__main__":
             print("break")
 
         if event_visu == 'Run HELIOS':
+            print("genes selectionnes : ", genes_selected)
             if all_initial_states_bool_visu:
                 flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
                     genes_names=genes_names_list, genes_network=network_dictionary, initial_state_number='all',
@@ -487,7 +488,7 @@ if __name__ == "__main__":
             importdata_active = False
             savedata_active = False
 
-            col_graph1 = [[sg.Text('Input : List of genes', text_color='#e4e4e4', background_color='#343434')],
+            col_graphs1 = [[sg.Text('Input : List of genes', text_color='#e4e4e4', background_color='#343434')],
                           [sg.Listbox(values=genes_names_list,
                                       select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(20, 15),
                                       tooltip='Highlighted genes will be set to 1 at the start of each simulation run if the choice of genes initial states parameter is << specified >>')],
@@ -526,7 +527,7 @@ if __name__ == "__main__":
                 [sg.Text('', background_color='#343434')]]
 
             layout_graphs = [
-                [sg.Column(col_graph1, background_color='#343434'), sg.Column(col_graphs2, background_color='#343434')],
+                [sg.Column(col_graphs1, background_color='#343434'), sg.Column(col_graphs2, background_color='#343434')],
                 [sg.Text('Extract core network :', text_color='#e4e4e4', background_color='#343434')],
                 [sg.Button('Back to files import'), sg.Exit()]]
 
@@ -536,7 +537,7 @@ if __name__ == "__main__":
 
                 event_graphs, values_graph = window_graphs.Read()
 
-                genes_selected_visu = values_visu[0]
+                genes_selected_visu = values_graph[0]
                 graph_selected = values_graph[1]
                 layout_selected = values_graph[2]
                 activate_gene_color = values_graph[3]
@@ -558,11 +559,11 @@ if __name__ == "__main__":
                     window_graph = sg.Window('Interaction Graph',
                                              layout_graph, finalize=True)
 
-                    fig, G = drawGraph(genes_names_list, network_as_list, flow, genes_selected_visu, graph_selected,
+                    fig, G = drawGraph(genes_names_list, network_as_list, flow, graph_selected,
                                        layout_selected,
                                        activate_gene_color, inactivate_gene_color, activate_interaction_color,
                                        inactivate_interaction_color,
-                                       width_interaction)
+                                       width_interaction, genes_selected_visu)
                     # add the plot to the window
                     fig_canvas_agg = draw_figure(window_graph['-CANVAS-'].TKCanvas, fig)
                     fig.canvas.callbacks.connect('pick_event', on_pick)
