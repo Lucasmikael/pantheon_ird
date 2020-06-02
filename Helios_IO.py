@@ -4,8 +4,8 @@ from pythonis_model import *
 import networkx as nx
 
 
-def saveData(network_as_list, flow, genes_names_list):
-    file = open("nodegraph.csv", 'w')
+def saveData(network_as_list, flow, genes_names_list,name_saved_file):
+    file = open(name_saved_file, 'w')
     interaction = 0
     with file:
         writer = csv.writer(file)

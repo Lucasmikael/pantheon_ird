@@ -52,24 +52,13 @@ while True:             # Event Loop
             window2.close()
         if event == 'Show':
             win3_active = True
-            layout3 = [
-                [sg.Text('The third Window')],
-                [sg.Input(key='-IN-')],
-                [sg.Button('Show third'), sg.Button('Exit')]
-                    ]
-            window3 = sg.Window('Second Window', layout3)
+            layout_graph = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Exit()]]
+            window_graph = sg.Window('Interaction Graph',
+                                    layout_graph, finalize=True)
 
-        if event == "show New":
-            win4_active = True
-            layout4 = [
-                [sg.Text('The third Bis ')],
-                [sg.Input(key='-IN-')],
-                [sg.Button('Show third'), sg.Button('Exit')]
-                    ]
-            window4 = sg.Window('Second Window', layout4)
 
         if win3_active:
-            event,values = window3.read(timeout=100)
+            event,values = window_graph.read(timeout=100)
             if event == "Show third":
                 sg.popup('You entered last window')
 
