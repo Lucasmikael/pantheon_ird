@@ -1,61 +1,184 @@
 # -*- coding: utf-8 -*-
 
-import os
-import csv
-import re
-import itertools
-import time
-import datetime
-import numpy as np
-import scipy as sp
-import random as rd
-import matplotlib.pyplot as plt
 import PySimpleGUI as sg
-from numpy import array
-from pythonis_tools import *
 from pythonis_filesIO import *
-from pythonis_model import *
 from random_network import *
 from Helios_model import *
 from Helios_Refactor_Pythonis import *
 from Helios_IO import *
 from Helios_addElement import *
+from Helios_geneGraph import *
 
-# def fonctionMain(working_directory, genes_list_file, network_structure_file, nb_columns_genes=1, name_index=1,
-#                  nb_columns_network=3, network_headers=0, nb_starting_states='10', KO_genes_param=['foo'],
-#                  OA_genes_param=['foo'], model_type='logical', boundary_model='transient'):
-#     os.chdir(working_directory)
-#     a, b, c = ImportBooleanModel(working_directory, genes_list_file, network_structure_file, nb_columns_genes,
-#                                  name_index,
-#                                  nb_columns_network, network_headers)
-#
-#     flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModel(a, b, 't',
-#                                                                                                            't',
-#                                                                                                            initial_state_number=nb_starting_states,
-#                                                                                                            initial_state_choice='random',
-#                                                                                                            stimulus=boundary_model,
-#                                                                                                            initial_state_genes=[
-#                                                                                                                'foo'],
-#                                                                                                            model=model_type,
-#                                                                                                            KO_genes=KO_genes_param,
-#                                                                                                            OA_genes=OA_genes_param)
-#
-#     resMod(a, b, start, flow, stable, genes_list_file, network_structure_file, genes_names, KO_genes_param,
-#            OA_genes_param, model_type, boundary_model, network, initial_states,
-#            stable_states, data)
-#     # listing(stable_states, data, stable)
-#     # performance(time, initial_state_number=50000)
-#
-#     return a, b, flow, stable, start
-#
-#
-# def generate_pairs(source):
-#     pairs = []
-#     for p1 in range(len(source)):
-#         for p2 in range(p1 + 1, len(source)):
-#             pairs.append([source[p1], source[p2]])
-#     return pairs
-#
+
+def layoutStart():
+    layout_start = [[sg.Frame(layout=[[sg.Text('Gene List File', background_color='#343434', text_color='#e4e4e4')],
+                                      [sg.Input(), sg.FileBrowse()],
+                                      [sg.Text('Network Structure File', background_color='#343434',
+                                               text_color='#e4e4e4')],
+                                      [sg.Input(), sg.FileBrowse()]],
+                              title='Import network', title_color='#e4e4e4', relief=sg.RELIEF_SUNKEN,
+                              background_color='#343434',
+                              tooltip='Choose gene list file and network structure file to import a predefined network model')],
+                    [sg.Frame(layout=[[sg.Text('Number of nodes', background_color='#343434', text_color='#e4e4e4')],
+                                      [sg.Input()],
+                                      [sg.Text('Number of interactions', background_color='#343434',
+                                               text_color='#e4e4e4')],
+                                      [sg.Input()]],
+                              title='Gene network Automated Initiation Algorithm (GAIA)', title_color='#e4e4e4',
+                              relief=sg.RELIEF_SUNKEN,
+                              background_color='#343434',
+                              tooltip='Create a random network to work with')],
+                    [sg.Frame(layout=[[sg.Radio('Batch Computation Mode', 'RADIO1', default=True, size=(18, 1),
+                                                background_color='#343434', text_color='#e4e4e4'),
+                                       sg.Radio('Visual Network Mode', 'RADIO1', background_color='#343434',
+                                                text_color='#e4e4e4')]],
+                              title='Run mode', title_color='#e4e4e4', relief=sg.RELIEF_SUNKEN,
+                              background_color='#343434',
+                              tooltip='Batch computation for whole network simulation and genes significance study / Interactive network to quick test hypothesis manually and visually')],
+                    [sg.CloseButton('Import'), sg.CloseButton('Cancel')]]
+    window_start = sg.Window("Initialize Network", alpha_channel=0.95, layout=layout_start)
+    return window_start
+
+
+def layoutBooleanModelVisu():
+    col_visu1 = [[sg.Text('Input : List of genes', text_color='#e4e4e4', background_color='#343434')],
+                 [sg.Listbox(values=genes_names_list,
+                             select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(20, 35),
+                             tooltip='Highlighted genes will be set to 1 at the start of each simulation run if the choice of genes initial states parameter is << specified >>')],
+                 ]
+
+    col_visu2 = [[sg.Text('Input : Interactions in the network', text_color='#e4e4e4', background_color='#343434')],
+                 [sg.Listbox(values=network_as_list,
+                             select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(30, 35),
+                             tooltip='Format is [Source gene, interaction (-1: repression, 1 : activation), target gene]')],
+                 ]
+
+    # col_subbatch3 = [[sg.Listbox(values=model_type_list, select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(15, 4),
+    #                              tooltip='Highlight the models to run through ARGOS'),
+    #                   sg.Listbox(values=boundary_model_list, select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(15, 4),
+    #                              tooltip='Highlight the models to run through ARGOS')]]
+
+    col_visu3 = [[sg.Frame(layout=[[sg.Text('Model type', text_color='#e4e4e4', background_color='#343434',
+                                            tooltip='Choice of rules to apply to the network structure'),
+                                    sg.Combo(values=model_type_list, default_value=model_type_list[0])],
+                                   [sg.Text('Boundary conditions', text_color='#e4e4e4', background_color='#343434',
+                                            tooltip='Choice of behavior for nodes without regulators'),
+                                    sg.Combo(values=boundary_model_list, default_value=boundary_model_list[0])],
+                                   [sg.Text('Genes initial states', text_color='#e4e4e4',
+                                            background_color='#343434',
+                                            tooltip='In <<specified>> mode, use the gene list panel to highlight the genes to be set to 1 at start,\n all other genes will be set to 0 (0 or 1 in <<random-specified>> mode)'),
+                                    sg.Combo(values=initial_states_choice_list,
+                                             default_value=initial_states_choice_list[0])],
+                                   [sg.Text('Number of initial states :', text_color='#e4e4e4',
+                                            background_color='#343434',
+                                            tooltip='Choice of how many initial states the model will run from'),
+                                    sg.Radio('All possible states', 'RADIO2', background_color='#343434',
+                                             text_color='#e4e4e4'),
+                                    sg.Radio('Given number of states', 'RADIO2', background_color='#343434',
+                                             text_color='#e4e4e4', default=True),
+                                    sg.InputText(size=(10, 1), default_text='1')],
+                                   [sg.Text('KO mutation type', text_color='#e4e4e4', background_color='#343434',
+                                            tooltip='Choice of Knocked Out mutation to apply to the network \n- single KO will run the model mutating each chosen genes one at a time'
+                                                    '\n- multiple KO will run the model once with all chosen genes as KO'
+                                                    '\n- combination KO will go through all combinations of double KO for the chosen genes and run the model for each'),
+                                    sg.Combo(values=KO_mutation_type_list, default_value=KO_mutation_type_list[0])],
+                                   [sg.Text('List of KO genes', text_color='#e4e4e4', background_color='#343434',
+                                            tooltip='Enter gene names separated by a colon e.g. ABC, LMN, XYZ'),
+                                    sg.InputText()],
+                                   [sg.Text('OA mutation type', text_color='#e4e4e4', background_color='#343434',
+                                            tooltip='Choice of Over Activated mutation to apply to the network \n- single OA will run the model mutating each chosen genes one at a time'
+                                                    '\n- multiple OA will run the model once with all chosen genes as KO'
+                                                    '\n- combination OA will go through all combinations of double KO for the chosen genes and run the model for each'),
+                                    sg.Combo(values=OA_mutation_type_list, default_value=OA_mutation_type_list[0])],
+                                   [sg.Text('List of OA genes', text_color='#e4e4e4', background_color='#343434',
+                                            tooltip='Enter gene names separated by a colon e.g. ABC, LMN, XYZ'),
+                                    sg.InputText()],
+                                   [sg.Button('Run HELIOS')]
+                                   ],
+                           title='Predict System Fates', title_color='#e4e4e4', background_color='#343434',
+                           relief=sg.RELIEF_GROOVE)],
+                 [sg.Frame(layout=[
+                     [sg.Text('Source', text_color='#e4e4e4', background_color='#343434',
+                              tooltip='Value must a number'), sg.InputText(size=(10, 1)),
+                      sg.Text('Interaction', text_color='#e4e4e4', background_color='#343434',
+                              tooltip='1 for activation or -1 for inhibition'), sg.InputText(size=(10, 1)),
+                      sg.Text('Target', text_color='#e4e4e4', background_color='#343434',
+                              tooltip='Value must a '), sg.InputText(size=(10, 1)), sg.Button('Add element')]],
+                     title='Add element to graph', title_color='#e4e4e4',
+                     background_color='#343434', relief=sg.RELIEF_GROOVE)],
+                 [sg.Frame(layout=[
+                     [sg.Button('Add element from CSV'), sg.Input(), sg.FileBrowse()]],
+                     title='Add element from CSV', title_color='#e4e4e4',
+                     background_color='#343434', relief=sg.RELIEF_GROOVE)],
+                 [sg.Frame(layout=[
+                     [sg.Input(), sg.FileBrowse(), sg.Button("Load")]],
+                     title='Load saved graph', title_color='#e4e4e4',
+                     background_color='#343434', relief=sg.RELIEF_GROOVE)],
+                 [sg.Text('', background_color='#343434')]]
+
+    layout_visu = [
+        [sg.Column(col_visu1, background_color='#343434'), sg.Column(col_visu2, background_color='#343434'),
+         sg.Column(col_visu3, background_color='#343434')],
+        [sg.Text('Extract core network :', text_color='#e4e4e4', background_color='#343434')],
+        [sg.Exit()]]
+
+    window_visu = sg.Window("Initialize Network", alpha_channel=0.95, layout=layout_visu)
+    return window_visu
+
+
+def layoutVisuGraph(list_panel, layout_graph_drawing, layout_color_drawing):
+    col_graphs1 = [[sg.Text('Input : List of genes', text_color='#e4e4e4', background_color='#343434')],
+                   [sg.Listbox(values=genes_names_list,
+                               select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(20, 15),
+                               tooltip='Highlighted genes will be set to 1 at the start of each simulation run if the choice of genes initial states parameter is << specified >>')],
+                   ]
+
+    col_graphs2 = [
+        [sg.Frame(layout=[
+            [sg.Text('State', text_color='#e4e4e4', background_color='#343434',
+                     tooltip='Select number state'),
+             sg.Combo(values=list_panel, default_value=list_panel[0]),
+             sg.Text('Layout', text_color='#e4e4e4', background_color='#343434'),
+             sg.Combo(values=layout_graph_drawing, default_value=layout_graph_drawing[0])],
+            [sg.Text('Active genes color', text_color='#e4e4e4', background_color='#343434',
+                     tooltip='Select color of inactive genes'),
+             sg.Combo(values=layout_color_drawing, default_value=layout_color_drawing[3]),
+             sg.Text('Inactive genes color', text_color='#e4e4e4', background_color='#343434',
+                     tooltip='Select color of inactive genes'),
+             sg.Combo(values=layout_color_drawing, default_value=layout_color_drawing[0])],
+            [sg.Text('Active interaction color', text_color='#e4e4e4', background_color='#343434',
+                     tooltip='Select color of active interaction'),
+             sg.Combo(values=layout_color_drawing, default_value=layout_color_drawing[10]),
+             sg.Text('Inactive interaction color', text_color='#e4e4e4', background_color='#343434',
+                     tooltip='Select color of inactive interaction'),
+             sg.Combo(values=layout_color_drawing, default_value=layout_color_drawing[10])],
+            [sg.Text('Width active Interaction', text_color='#e4e4e4', background_color='#343434',
+                     tooltip='Value must a number'),
+             sg.InputText(size=(5, 1), default_text="1")],
+            [sg.Button('Launch visualization')]],
+            title='Vsualization settings', title_color='#e4e4e4',
+            background_color='#343434', relief=sg.RELIEF_GROOVE)],
+
+        [sg.Frame(layout=[
+            [sg.Button('Save graph'), sg.InputText(size = (35,1))]],
+            title='Save Data', title_color='#e4e4e4',
+            background_color='#343434', relief=sg.RELIEF_GROOVE,tooltip='The file extension CSV will be automatically added')],
+        [sg.Frame(layout=[
+            [sg.Button('Save gene activity')]],
+            title='Save gene activity graph', title_color='#e4e4e4',
+            background_color='#343434', relief=sg.RELIEF_GROOVE,
+            tooltip='The file extension CSV will be automatically added')],
+        [sg.Text('', background_color='#343434')]]
+
+    layout_graphs = [
+        [sg.Column(col_graphs1, background_color='#343434'),
+         sg.Column(col_graphs2, background_color='#343434')],
+        [sg.Text('Extract core network :', text_color='#e4e4e4', background_color='#343434')],
+        [sg.Exit()]]
+
+    window_graphs = sg.Window("Initialize Network", alpha_channel=0.95, layout=layout_graphs)
+    return window_graphs
+
 
 #######
 #
@@ -92,33 +215,7 @@ if __name__ == "__main__":
     event_title, values_title = window_title.Read()
     window_title.Close()
 
-    # layout for the first window - import of gene list and gene network files
-    layout_start = [[sg.Frame(layout=[[sg.Text('Gene List File', background_color='#343434', text_color='#e4e4e4')],
-                                      [sg.Input(), sg.FileBrowse()],
-                                      [sg.Text('Network Structure File', background_color='#343434',
-                                               text_color='#e4e4e4')],
-                                      [sg.Input(), sg.FileBrowse()]],
-                              title='Import network', title_color='#e4e4e4', relief=sg.RELIEF_SUNKEN,
-                              background_color='#343434',
-                              tooltip='Choose gene list file and network structure file to import a predefined network model')],
-                    [sg.Frame(layout=[[sg.Text('Number of nodes', background_color='#343434', text_color='#e4e4e4')],
-                                      [sg.Input()],
-                                      [sg.Text('Number of interactions', background_color='#343434',
-                                               text_color='#e4e4e4')],
-                                      [sg.Input()]],
-                              title='Gene network Automated Initiation Algorithm (GAIA)', title_color='#e4e4e4',
-                              relief=sg.RELIEF_SUNKEN,
-                              background_color='#343434',
-                              tooltip='Create a random network to work with')],
-                    [sg.Frame(layout=[[sg.Radio('Batch Computation Mode', 'RADIO1', default=True, size=(18, 1),
-                                                background_color='#343434', text_color='#e4e4e4'),
-                                       sg.Radio('Visual Network Mode', 'RADIO1', background_color='#343434',
-                                                text_color='#e4e4e4')]],
-                              title='Run mode', title_color='#e4e4e4', relief=sg.RELIEF_SUNKEN,
-                              background_color='#343434',
-                              tooltip='Batch computation for whole network simulation and genes significance study / Interactive network to quick test hypothesis manually and visually')],
-                    [sg.CloseButton('Import'), sg.CloseButton('Cancel')]]
-    window_start = sg.Window("Initialize Network", alpha_channel=0.95, layout=layout_start)
+    window_start = layoutStart()
     event_start, values_start = window_start.Read()
     window_start.Close()
 
@@ -331,85 +428,10 @@ if __name__ == "__main__":
                 genes_list_filename,
                 network_filename)
 
-        # genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
-        #                                                                    network_as_list)
-
-        col_visu1 = [[sg.Text('Input : List of genes', text_color='#e4e4e4', background_color='#343434')],
-                     [sg.Listbox(values=genes_names_list,
-                                 select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(20, 35),
-                                 tooltip='Highlighted genes will be set to 1 at the start of each simulation run if the choice of genes initial states parameter is << specified >>')],
-                     ]
-
-        col_visu2 = [[sg.Text('Input : Interactions in the network', text_color='#e4e4e4', background_color='#343434')],
-                     [sg.Listbox(values=network_as_list,
-                                 select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(30, 35),
-                                 tooltip='Format is [Source gene, interaction (-1: repression, 1 : activation), target gene]')],
-                     ]
-
-        # col_subbatch3 = [[sg.Listbox(values=model_type_list, select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(15, 4),
-        #                              tooltip='Highlight the models to run through ARGOS'),
-        #                   sg.Listbox(values=boundary_model_list, select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(15, 4),
-        #                              tooltip='Highlight the models to run through ARGOS')]]
-
-        col_visu3 = [[sg.Frame(layout=[[sg.Text('Model type', text_color='#e4e4e4', background_color='#343434',
-                                                tooltip='Choice of rules to apply to the network structure'),
-                                        sg.Combo(values = model_type_list, default_value= model_type_list[0])],
-                                       [sg.Text('Boundary conditions', text_color='#e4e4e4', background_color='#343434',
-                                                tooltip='Choice of behavior for nodes without regulators'),
-                                        sg.Combo(values = boundary_model_list, default_value= boundary_model_list[0])],
-                                       [sg.Text('Genes initial states', text_color='#e4e4e4',
-                                                background_color='#343434',
-                                                tooltip='In <<specified>> mode, use the gene list panel to highlight the genes to be set to 1 at start,\n all other genes will be set to 0 (0 or 1 in <<random-specified>> mode)'),
-                                        sg.Combo(values = initial_states_choice_list, default_value= initial_states_choice_list[0])],
-                                       [sg.Text('Number of initial states :', text_color='#e4e4e4',
-                                                background_color='#343434',
-                                                tooltip='Choice of how many initial states the model will run from'),
-                                        sg.Radio('All possible states', 'RADIO2', background_color='#343434',
-                                                 text_color='#e4e4e4'),
-                                        sg.Radio('Given number of states', 'RADIO2', background_color='#343434',
-                                                 text_color='#e4e4e4', default=True),
-                                        sg.InputText(size=(10, 1), default_text='1')],
-                                       [sg.Text('KO mutation type', text_color='#e4e4e4', background_color='#343434',
-                                                tooltip='Choice of Knocked Out mutation to apply to the network \n- single KO will run the model mutating each chosen genes one at a time'
-                                                        '\n- multiple KO will run the model once with all chosen genes as KO'
-                                                        '\n- combination KO will go through all combinations of double KO for the chosen genes and run the model for each'),
-                                        sg.Combo(values = KO_mutation_type_list, default_value= KO_mutation_type_list[0])],
-                                       [sg.Text('List of KO genes', text_color='#e4e4e4', background_color='#343434',
-                                                tooltip='Enter gene names separated by a colon e.g. ABC, LMN, XYZ'),
-                                        sg.InputText()],
-                                       [sg.Text('OA mutation type', text_color='#e4e4e4', background_color='#343434',
-                                                tooltip='Choice of Over Activated mutation to apply to the network \n- single OA will run the model mutating each chosen genes one at a time'
-                                                        '\n- multiple OA will run the model once with all chosen genes as KO'
-                                                        '\n- combination OA will go through all combinations of double KO for the chosen genes and run the model for each'),
-                                        sg.Combo(values = OA_mutation_type_list, default_value= OA_mutation_type_list[0])],
-                                       [sg.Text('List of OA genes', text_color='#e4e4e4', background_color='#343434',
-                                                tooltip='Enter gene names separated by a colon e.g. ABC, LMN, XYZ'),
-                                        sg.InputText()],
-                                       [sg.Button('Run HELIOS')]
-                                       ],
-                               title='Predict System Fates', title_color='#e4e4e4', background_color='#343434',
-                               relief=sg.RELIEF_GROOVE)],
-                     [sg.Frame(layout=[
-                         [sg.Button('Add element')]],
-                         title='Add element to graph', title_color='#e4e4e4',
-                         background_color='#343434', relief=sg.RELIEF_GROOVE)],
-                     [sg.Frame(layout=[
-                         [sg.Input(),sg.FileBrowse(),sg.Button("Load")]],
-                         title='Load saved graph', title_color='#e4e4e4',
-                         background_color='#343434', relief=sg.RELIEF_GROOVE)],
-                     [sg.Text('', background_color='#343434')]]
-
-        layout_visu = [
-            [sg.Column(col_visu1, background_color='#343434'), sg.Column(col_visu2, background_color='#343434'),
-             sg.Column(col_visu3, background_color='#343434')],
-            [sg.Text('Extract core network :', text_color='#e4e4e4', background_color='#343434')],
-            [sg.Exit()]]
-
-        window_visu = sg.Window("Initialize Network", alpha_channel=0.95, layout=layout_visu)
-
-
+        window_visu = layoutBooleanModelVisu()
         win2_active = False
         win3_active = False
+        win4_active = False
         i = 0
         while True:  # Event Loop
             event_visu, values_visu = window_visu.read(timeout=100)
@@ -424,7 +446,11 @@ if __name__ == "__main__":
             subset_initial_states_bool_visu = values_visu[6]
             number_initial_states = values_visu[7]
             KO_type_selected = values_visu[8]
-            load_saved_file = values_visu[12]
+            source_gene_add = values_visu[12]
+            interaction_add = values_visu[13]
+            target_gene_add = values_visu[14]
+            CSV_element_add = values_visu[15]
+            load_saved_file = values_visu[16]
             if KO_type_selected != 'none':
                 KO_genes_selected = values_visu[9]
                 KO_genes_selected = KO_genes_selected.rsplit(',')
@@ -438,12 +464,19 @@ if __name__ == "__main__":
                 OA_genes_selected = ['foo']
             if event_visu in (sg.WIN_CLOSED, 'Exit'):
                 break
-            if event_visu == "Add element":
-                genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
-                                                                                   network_as_list)
+
             if event_visu == "Load":
                 interaction_table, node_table = openData(load_saved_file)
                 print("import done")
+            if event_visu == 'Add element':
+                source_gene_list, interaction_list, target_gene_list = catchGUIElement(source_gene_add, interaction_add, target_gene_add)
+                genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
+                                                                                   network_as_list, source_gene_list, interaction_list,target_gene_list)
+            if event_visu == 'Add element from CSV':
+                source_gene_list, interaction_list, target_gene_list = addElementfromCSV(CSV_element_add)
+                genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
+                                                                                   network_as_list, source_gene_list, interaction_list,target_gene_list)
+
             if event_visu == 'Run HELIOS' and not win2_active:  # only run if not already showing a window2
                 win2_active = True
                 print("genes selectionnes : ", genes_selected)
@@ -492,56 +525,10 @@ if __name__ == "__main__":
                 layout_color_drawing = ["blue", "orange", "green", "red", "purple", "brown", "pink", "grey", "olive",
                                         "cyan", "black"]
 
-                ##
-
-                col_graphs1 = [[sg.Text('Input : List of genes', text_color='#e4e4e4', background_color='#343434')],
-                               [sg.Listbox(values=genes_names_list,
-                                           select_mode=sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(20, 15),
-                                           tooltip='Highlighted genes will be set to 1 at the start of each simulation run if the choice of genes initial states parameter is << specified >>')],
-                               ]
-
-                col_graphs2 = [
-                    [sg.Frame(layout=[
-                        [sg.Text('State', text_color='#e4e4e4', background_color='#343434',
-                                 tooltip='Select number state'),
-                         sg.Combo(values=list_panel, default_value=list_panel[0]),
-                         sg.Text('Layout', text_color='#e4e4e4', background_color='#343434'),
-                         sg.Combo(values=layout_graph_drawing, default_value=layout_graph_drawing[0])],
-                        [sg.Text('Active genes color', text_color='#e4e4e4', background_color='#343434',
-                                 tooltip='Select color of inactive genes'),
-                         sg.Combo(values=layout_color_drawing, default_value=layout_color_drawing[3]),
-                         sg.Text('Inactive genes color', text_color='#e4e4e4', background_color='#343434',
-                                 tooltip='Select color of inactive genes'),
-                         sg.Combo(values=layout_color_drawing, default_value=layout_color_drawing[0])],
-                        [sg.Text('Active interaction color', text_color='#e4e4e4', background_color='#343434',
-                                 tooltip='Select color of active interaction'),
-                         sg.Combo(values=layout_color_drawing, default_value=layout_color_drawing[10]),
-                         sg.Text('Inactive interaction color', text_color='#e4e4e4', background_color='#343434',
-                                 tooltip='Select color of inactive interaction'),
-                         sg.Combo(values=layout_color_drawing, default_value=layout_color_drawing[10])],
-                        [sg.Text('Width active Interaction', text_color='#e4e4e4', background_color='#343434',
-                                 tooltip='Value must a number'),
-                         sg.InputText(size=(5, 1), default_text="1")],
-                        [sg.Button('Launch visualization')]],
-                        title='Vsualization settings', title_color='#e4e4e4',
-                        background_color='#343434', relief=sg.RELIEF_GROOVE)],
-
-                    [sg.Frame(layout=[
-                        [sg.Button('Save graph'), sg.InputText()]],
-                        title='Save Data', title_color='#e4e4e4',
-                        background_color='#343434', relief=sg.RELIEF_GROOVE)],
-                    [sg.Text('', background_color='#343434')]]
-
-                layout_graphs = [
-                    [sg.Column(col_graphs1, background_color='#343434'),
-                     sg.Column(col_graphs2, background_color='#343434')],
-                    [sg.Text('Extract core network :', text_color='#e4e4e4', background_color='#343434')],
-                    [sg.Exit()]]
-
-                window_graphs = sg.Window("Initialize Network", alpha_channel=0.95, layout=layout_graphs)
-
+                window_graphs = layoutVisuGraph(list_panel, layout_graph_drawing, layout_color_drawing)
 
             if win2_active:
+
                 event_graphs, values_graph = window_graphs.Read()
 
                 genes_selected_visu = values_graph[0]
@@ -554,6 +541,8 @@ if __name__ == "__main__":
                 width_interaction = values_graph[7]
                 name_saved_file = values_graph[8]
 
+                if event_graphs == 'Save gene activity':
+                    drawStateActivationGraph(genes_selected_visu, flow, genes_names_list)
                 if event_graphs == 'Exit' or event_graphs == sg.WIN_CLOSED:
                     # print("Closing window 2", event)
                     win2_active = False
@@ -570,7 +559,7 @@ if __name__ == "__main__":
                     window_graph = sg.Window('Interaction Graph',
                                              layout_graph, finalize=True)
 
-                # if win3_active:
+                    # if win3_active:
                     fig, G = drawGraph(genes_names_list, network_as_list, flow, graph_selected,
                                        layout_selected,
                                        activate_gene_color, inactivate_gene_color, activate_interaction_color,
@@ -589,7 +578,6 @@ if __name__ == "__main__":
                     saveData(network_as_list, flow, genes_names_list, name_saved_file)
 
         window_visu.close()
-
 
 """
     if mutant_flag == 'singleKO' :

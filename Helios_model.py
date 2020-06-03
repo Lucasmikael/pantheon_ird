@@ -17,20 +17,13 @@ def createListPanelGraph(flow):
 
 def drawGraph(genes_names_list, network_as_list, flow, graph_selected, layout_selected, color_activate_node,
               color_inactivate_node, color_active_edge, color_inactivate_edge, activate_widthedge,genes_selected_visu):
-    print("genes selctionnes : ", genes_selected_visu)
-    G = nx.MultiDiGraph()
 
-    # positive_gene, negative_gene,normal_gene = getAutoregulate(network_as_list,genes_names_list)
+    G = nx.MultiDiGraph()
     value_source = getFlow(flow, graph_selected)
     global_gene_state = getRegulationActivation(network_as_list, genes_names_list, value_source)
-    # activation_table = activationFlowTable(value_source, genes_names_list)
-
-    # activation_table = activationFlowTable (value_source, genes_names_list)
-
     # ajout des aretes et des noeuds
     G = addNodes(global_gene_state, G)
     G = addEdges(network_as_list, G)
-
     fig, G = drawFig(G, global_gene_state, layout_selected, color_activate_node, color_inactivate_node,
                      color_active_edge, color_inactivate_edge, activate_widthedge, genes_selected_visu)
 
