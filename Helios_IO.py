@@ -5,7 +5,7 @@ import networkx as nx
 
 
 def saveData(network_as_list, flow, genes_names_list,name_saved_file):
-    file = open(name_saved_file, 'w')
+    file = open(name_saved_file+".csv", 'w')
     interaction = 0
     with file:
         writer = csv.writer(file)
@@ -33,8 +33,8 @@ def saveData(network_as_list, flow, genes_names_list,name_saved_file):
             writer.writerow(["Fin"])
 
 
-def openData():
-    file = open("nodegraph.csv", "r")
+def openData(load_saved_file):
+    file = open(load_saved_file, "r")
     reader = csv.reader(file, delimiter=",")
     interaction = False
     state = False

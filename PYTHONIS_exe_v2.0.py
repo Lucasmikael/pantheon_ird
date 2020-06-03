@@ -331,8 +331,8 @@ if __name__ == "__main__":
                 genes_list_filename,
                 network_filename)
 
-        genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
-                                                                           network_as_list)
+        # genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
+        #                                                                    network_as_list)
 
         col_visu1 = [[sg.Text('Input : List of genes', text_color='#e4e4e4', background_color='#343434')],
                      [sg.Listbox(values=genes_names_list,
@@ -394,7 +394,7 @@ if __name__ == "__main__":
                          title='Add element to graph', title_color='#e4e4e4',
                          background_color='#343434', relief=sg.RELIEF_GROOVE)],
                      [sg.Frame(layout=[
-                         [sg.Button('Load')]],
+                         [sg.Input(),sg.FileBrowse(),sg.Button("Load")]],
                          title='Load saved graph', title_color='#e4e4e4',
                          background_color='#343434', relief=sg.RELIEF_GROOVE)],
                      [sg.Text('', background_color='#343434')]]
@@ -410,7 +410,6 @@ if __name__ == "__main__":
 
         win2_active = False
         win3_active = False
-        win4_active = False
         i = 0
         while True:  # Event Loop
             event_visu, values_visu = window_visu.read(timeout=100)
@@ -425,6 +424,7 @@ if __name__ == "__main__":
             subset_initial_states_bool_visu = values_visu[6]
             number_initial_states = values_visu[7]
             KO_type_selected = values_visu[8]
+            load_saved_file = values_visu[12]
             if KO_type_selected != 'none':
                 KO_genes_selected = values_visu[9]
                 KO_genes_selected = KO_genes_selected.rsplit(',')
@@ -438,6 +438,12 @@ if __name__ == "__main__":
                 OA_genes_selected = ['foo']
             if event_visu in (sg.WIN_CLOSED, 'Exit'):
                 break
+            if event_visu == "Add element":
+                genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
+                                                                                   network_as_list)
+            if event_visu == "Load":
+                interaction_table, node_table = openData(load_saved_file)
+                print("import done")
             if event_visu == 'Run HELIOS' and not win2_active:  # only run if not already showing a window2
                 win2_active = True
                 print("genes selectionnes : ", genes_selected)
