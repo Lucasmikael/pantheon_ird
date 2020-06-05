@@ -462,6 +462,7 @@ if __name__ == "__main__":
                 OA_genes_selected = OA_genes_selected.rsplit(',')
             else:
                 OA_genes_selected = ['foo']
+
             if event_visu in (sg.WIN_CLOSED, 'Exit'):
                 break
 
@@ -573,6 +574,7 @@ if __name__ == "__main__":
                     canvas = canvas_elem.TKCanvas
                     event, values = window_graph.read()
                     window_graph.close()
+                    delete_figure_agg(fig_canvas_agg)
 
                 if event_graphs == "Save graph":
                     saveData(network_as_list, flow, genes_names_list, name_saved_file)

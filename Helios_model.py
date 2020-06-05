@@ -207,6 +207,10 @@ def draw_figure(canvas, figure, loc=(0, 0)):
     return figure_canvas_agg
 
 
+def delete_figure_agg(figure_agg):
+    figure_agg.get_tk_widget().forget()
+    plt.close('all')
+
 # ------------------------------- Beginning of INTERACTIVE CODE -------------------------------
 def on_pick(event):
     artist = event.artist
