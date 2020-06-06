@@ -6,3 +6,4 @@ def saveasOnePNG(fig):
 
 
 def displayDynamicView():
+    

@@ -56,7 +56,7 @@ values  = [None, None, None]
 
 while True:
     for i in range(3):
-        if active[i]:
+        if active[0]:
             event[i], values[i] = window[i].read(timeout=50)
             if event[i] != sg.TIMEOUT_KEY:
                 print(f'Window {i} event:{event[i]}, values:{values[i]}')

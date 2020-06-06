@@ -92,7 +92,7 @@ def layoutBooleanModelVisu():
                                    [sg.Text('List of OA genes', text_color='#e4e4e4', background_color='#343434',
                                             tooltip='Enter gene names separated by a colon e.g. ABC, LMN, XYZ'),
                                     sg.InputText()],
-                                   [sg.Button('Run HELIOS')]
+                                   [sg.Button('Run HELIOS'), sg.Button('Run HELIOS 2')]
                                    ],
                            title='Predict System Fates', title_color='#e4e4e4', background_color='#343434',
                            relief=sg.RELIEF_GROOVE)],
@@ -188,13 +188,31 @@ def layoutVisuGraph(list_panel, layout_graph_drawing, layout_color_drawing):
 
 
 def layout1():
-    return [[sg.Text('This is the 1st WINDOW', font=font)],
-            [sg.Button('Exit1', font=font)]]
+    return [[sg.Text('This is the 1st WINDOW')],
+            [sg.Button('Exit1')]]
 
 def layout2():
-    return [[sg.Text('This is the 2nd WINDOW', font=font)],
-            [sg.Button('Exit2', font=font)]]
+    return [[sg.Text('This is the 2nd WINDOW')],
+            [sg.Button('Exit2')]]
 
+
+
+
+
+
+
+folder = "F:\paperPYTHONIS\LRPnetwork-201903"
+gene_list_filename = "l_gnp-221018-161genes-Ju+PI-prior.txt"
+network_filename = "TDCor6.32_output_221018_parallel.txt"
+KO_genes_input = ['PLT1', 'ARF6', 'LRP1', 'PHB', 'TMO5', 'SHR', 'SCR', 'SHP1', 'ATML1', 'PID2']
+OA_genes_input = ['PLT7', 'PUCHI', 'CRF1', 'ARF2', 'PLT5', 'ARF9', 'ARF17', 'U.box', 'ARF19', 'WRKY43']
+more_KO_genes_input = [['PLT1'], ['PLT2'], ['PLT3'], ['PLT5'], ['PLT7'], ['ARF6'], ['ARF8'], ['PLT1', 'PLT2'],
+                       ['PLT5', 'PLT7'], ['ARF6', 'ARF8'], ['PLT1', 'PLT2', 'PLT3'], ['PLT3', 'PLT5', 'PLT7']]
+KO_mutation_type_list = ['none', 'single KO', 'multiple KO', 'combination KO']
+OA_mutation_type_list = ['none', 'single OA', 'multiple OA', 'combination OA']
+model_type_list = ['logical', 'algebraic']
+boundary_model_list = ['transient', 'constant']
+initial_states_choice_list = ['random', 'all_zeros', 'all_ones', 'specified', 'random-specified']
 
 if __name__ == "__main__":
 
@@ -427,12 +445,12 @@ if __name__ == "__main__":
 
     window_visu = layoutBooleanModelVisu()
 
-    active_1, active_2, active_3 = True, False, False
+    active_1, active_2, active_3, active_Canva, active_Canva_2 = True, False, False, False, False
 
 
     run = True
     while True :
-        for i in range(3):
+        for i in range(5):
             if active_1 :
                 event_visu, values_visu = window_visu.read(timeout=100)
 
@@ -467,71 +485,127 @@ if __name__ == "__main__":
 
 
 
+                if event_visu in (sg.WIN_CLOSED, 'Exit'):
+                    run = False
+                    break
+                if event_visu == "Load":
+                    interaction_table, node_table = openData(load_saved_file)
+                    print("import done")
+                if event_visu == 'Add element':
+                    source_gene_list, interaction_list, target_gene_list = catchGUIElement(source_gene_add, interaction_add, target_gene_add)
+                    genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
+                                                                                       network_as_list, source_gene_list, interaction_list,target_gene_list)
+                if event_visu == 'Add element from CSV':
+                    source_gene_list, interaction_list, target_gene_list = addElementfromCSV(CSV_element_add)
+                    genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
+                                                                                       network_as_list, source_gene_list, interaction_list,target_gene_list)
 
-            if event_visu in (sg.WIN_CLOSED, 'Exit'):
-                run = False
-                break
-            if event_visu == "Load":
-                interaction_table, node_table = openData(load_saved_file)
-                print("import done")
-            if event_visu == 'Add element':
-                source_gene_list, interaction_list, target_gene_list = catchGUIElement(source_gene_add, interaction_add, target_gene_add)
-                genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
-                                                                                   network_as_list, source_gene_list, interaction_list,target_gene_list)
-            if event_visu == 'Add element from CSV':
-                source_gene_list, interaction_list, target_gene_list = addElementfromCSV(CSV_element_add)
-                genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
-                                                                                   network_as_list, source_gene_list, interaction_list,target_gene_list)
+                if event_visu == 'Run HELIOS' and not active_2 :   # only run if not already showing a window2
+                    active_2 = True
 
-            if event_visu == 'Run HELIOS' and not active_2 :   # only run if not already showing a window2
-                active_2 = True
-                print("genes selectionnes : ", genes_selected)
-                if all_initial_states_bool_visu:
-                    flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
-                        genes_names=genes_names_list, genes_network=network_dictionary, initial_state_number='all',
-                        initial_state_choice=initial_state_selected,
-                        model=boolean_model_selected, stimulus=boundary_model_selected,
-                        initial_state_genes=genes_selected,
-                        KO_genes=KO_genes_selected, OA_genes=OA_genes_selected)
+                    print("genes selectionnes : ", genes_selected)
+                    if all_initial_states_bool_visu:
+                        flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
+                            genes_names=genes_names_list, genes_network=network_dictionary, initial_state_number='all',
+                            initial_state_choice=initial_state_selected,
+                            model=boolean_model_selected, stimulus=boundary_model_selected,
+                            initial_state_genes=genes_selected,
+                            KO_genes=KO_genes_selected, OA_genes=OA_genes_selected)
 
-                    resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename,
-                           network_filename,
-                           genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
-                           boundary_model_selected, network, initial_states, stable_states, data)
+                        resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename,
+                               network_filename,
+                               genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
+                               boundary_model_selected, network, initial_states, stable_states, data)
 
-                elif subset_initial_states_bool_visu:
-                    flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
-                        genes_names=genes_names_list, genes_network=network_dictionary,
-                        initial_state_number=number_initial_states, initial_state_choice=initial_state_selected,
-                        model=boolean_model_selected, stimulus=boundary_model_selected,
-                        initial_state_genes=genes_selected,
-                        KO_genes=KO_genes_selected, OA_genes=OA_genes_selected)
+                    elif subset_initial_states_bool_visu:
+                        flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
+                            genes_names=genes_names_list, genes_network=network_dictionary,
+                            initial_state_number=number_initial_states, initial_state_choice=initial_state_selected,
+                            model=boolean_model_selected, stimulus=boundary_model_selected,
+                            initial_state_genes=genes_selected,
+                            KO_genes=KO_genes_selected, OA_genes=OA_genes_selected)
 
-                    # resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename, network_filename,
-                    #        genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
-                    #        boundary_model_selected, network, initial_states, stable_states, data)
+                        # resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename, network_filename,
+                        #        genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
+                        #        boundary_model_selected, network, initial_states, stable_states, data)
 
-                else:
-                    sg.Popup(
-                        'Please select value for number of initial states ( <<all>> or enter numerical value ) and run PYTHONIS again',
-                        no_titlebar=True, background_color='#343434')
+                    else:
+                        sg.Popup(
+                            'Please select value for number of initial states ( <<all>> or enter numerical value ) and run PYTHONIS again',
+                            no_titlebar=True, background_color='#343434')
 
-                list_panel = createListPanelGraph(flow)
-                layout_graph_drawing = [
-                    'circular_layout',
-                    'kamada_kawai_layout',
-                    'random_layout',
-                    'shell_layout',
-                    'spring_layout',
-                    'spectral_layout',
-                    'planar_layout',
-                    'fruchterman_reingold_layout',
-                    'spiral_layout']
+                    list_panel = createListPanelGraph(flow)
+                    layout_graph_drawing = [
+                        'circular_layout',
+                        'kamada_kawai_layout',
+                        'random_layout',
+                        'shell_layout',
+                        'spring_layout',
+                        'spectral_layout',
+                        'planar_layout',
+                        'fruchterman_reingold_layout',
+                        'spiral_layout']
 
-                layout_color_drawing = ["blue", "orange", "green", "red", "purple", "brown", "pink", "grey", "olive",
-                                        "cyan", "black"]
+                    layout_color_drawing = ["blue", "orange", "green", "red", "purple", "brown", "pink", "grey", "olive",
+                                            "cyan", "black"]
 
-                window_graphs = layoutVisuGraph(list_panel, layout_graph_drawing, layout_color_drawing)
+                    window_2 = layoutVisuGraph(list_panel, layout_graph_drawing, layout_color_drawing)
+
+
+                if event_visu == 'Run HELIOS 2' and not active_3:
+                    print("tentative")
+                    active_3 = True
+
+                    print("genes selectionnes : ", genes_selected)
+                    if all_initial_states_bool_visu:
+                        flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
+                            genes_names=genes_names_list, genes_network=network_dictionary, initial_state_number='all',
+                            initial_state_choice=initial_state_selected,
+                            model=boolean_model_selected, stimulus=boundary_model_selected,
+                            initial_state_genes=genes_selected,
+                            KO_genes=KO_genes_selected, OA_genes=OA_genes_selected)
+
+                        resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename,
+                               network_filename,
+                               genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
+                               boundary_model_selected, network, initial_states, stable_states, data)
+
+                    elif subset_initial_states_bool_visu:
+                        flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
+                            genes_names=genes_names_list, genes_network=network_dictionary,
+                            initial_state_number=number_initial_states, initial_state_choice=initial_state_selected,
+                            model=boolean_model_selected, stimulus=boundary_model_selected,
+                            initial_state_genes=genes_selected,
+                            KO_genes=KO_genes_selected, OA_genes=OA_genes_selected)
+
+                        # resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename, network_filename,
+                        #        genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
+                        #        boundary_model_selected, network, initial_states, stable_states, data)
+
+                    else:
+                        sg.Popup(
+                            'Please select value for number of initial states ( <<all>> or enter numerical value ) and run PYTHONIS again',
+                            no_titlebar=True, background_color='#343434')
+
+                    list_panel = createListPanelGraph(flow)
+                    layout_graph_drawing = [
+                        'circular_layout',
+                        'kamada_kawai_layout',
+                        'random_layout',
+                        'shell_layout',
+                        'spring_layout',
+                        'spectral_layout',
+                        'planar_layout',
+                        'fruchterman_reingold_layout',
+                        'spiral_layout']
+
+                    layout_color_drawing = ["blue", "orange", "green", "red", "purple", "brown", "pink", "grey", "olive",
+                                            "cyan", "black"]
+
+                    window_3 = layoutVisuGraph(list_panel, layout_graph_drawing, layout_color_drawing)
+
+
+
 
 
 
@@ -550,15 +624,154 @@ if __name__ == "__main__":
 
 
             if active_2:
-                event_2, values_2 = window_2.read(timeout=50)
-                if event_2 == 'Exit1':
-                    window_2.close()
+                event_2, values_2 = window_2.read(timeout = 100)
+                genes_selected_visu = values_2[0]
+                graph_selected = values_2[1]
+                layout_selected = values_2[2]
+                activate_gene_color = values_2[3]
+                inactivate_gene_color = values_2[4]
+                activate_interaction_color = values_2[5]
+                inactivate_interaction_color = values_2[6]
+                width_interaction = values_2[7]
+                name_saved_file = values_2[8]
+                if event_2 in (sg.WIN_CLOSED, 'Exit'):
                     active_2 = False
+                    window_2.close()
+
+
+                if event_2 == 'Save gene activity':
+                    drawStateActivationGraph(genes_selected_visu, flow, genes_names_list)
+
+                if event_2 == 'Launch visualization':
+                    layout_graph = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Exit()]]
+
+                    # define the window layout
+                    # layout = [[sg.Text('Plot test', font='Any 18')],
+                    #           [sg.Canvas(size=(figure), key='canvas')]]
+                    #
+                    # # create the form and show it without the plot
+                    window_graph = sg.Window('Interaction Graph',
+                                             layout_graph, finalize=True)
+
+                    # if win3_active:
+                    fig, G = drawGraph(genes_names_list, network_as_list, flow, graph_selected,
+                                       layout_selected,
+                                       activate_gene_color, inactivate_gene_color, activate_interaction_color,
+                                       inactivate_interaction_color,
+                                       width_interaction, genes_selected_visu)
+                    # add the plot to the window
+                    fig_canvas_agg = draw_figure(window_graph['-CANVAS-'].TKCanvas, fig)
+                    fig.canvas.callbacks.connect('pick_event', on_pick)
+
+                    canvas_elem = window_graph['-CANVAS-']
+                    canvas = canvas_elem.TKCanvas
+                    event, values = window_graph.read()
+                    window_graph.close()
+                    delete_figure_agg(fig_canvas_agg)
+
+                if event_2 == "Save graph":
+                    saveData(network_as_list, flow, genes_names_list, name_saved_file)
 
             if active_3:
-                event_3, values_3 = window_3.read(timeout=50)
-                if event_3 == 'Exit2':
-                    window_3.close()
+                event_3, values_3 = window_3.read(timeout = 100)
+                genes_selected_visu = values_3[0]
+                graph_selected = values_3[1]
+                layout_selected = values_3[2]
+                activate_gene_color = values_3[3]
+                inactivate_gene_color = values_3[4]
+                activate_interaction_color = values_3[5]
+                inactivate_interaction_color = values_3[6]
+                width_interaction = values_3[7]
+                name_saved_file = values_3[8]
+                if event_3 in (sg.WIN_CLOSED, 'Exit'):
                     active_3 = False
+                    window_3.close()
+
+
+                if event_3 == 'Save gene activity':
+                    drawStateActivationGraph(genes_selected_visu, flow, genes_names_list)
+
+                if event_3 == 'Launch visualization':
+                    active_Canva_2 = True
+                    layout_graph_2 = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Exit()]]
+                    window_graph_2 = sg.Window('Interaction Graph',
+                                             layout_graph_2, finalize=True)
+                if event_3 == "Save graph":
+                    saveData(network_as_list, flow, genes_names_list, name_saved_file)
+
+
+            if active_Canva_2 :     # if win3_active:
+                fig2, G2 = drawGraph(genes_names_list, network_as_list, flow, graph_selected,
+                                   layout_selected,
+                                   activate_gene_color, inactivate_gene_color, activate_interaction_color,
+                                   inactivate_interaction_color,
+                                   width_interaction, genes_selected_visu)
+                # add the plot to the window
+                fig_canvas_agg_2 = draw_figure(window_graph_2['-CANVAS-'].TKCanvas, fig2)
+                fig2.canvas.callbacks.connect('pick_event', on_pick)
+
+                canvas_elem_2 = window_graph_2['-CANVAS-']
+                canvas = canvas_elem.TKCanvas
+                event, values = window_graph_2.read()
+                window_graph_2.close()
+                delete_figure_agg(fig_canvas_agg_2)
+
+
+
+
+
+
+
+                # event_graphs, values_graph = window_graphs.Read()
+                #
+                # genes_selected_visu = values_graph[0]
+                # graph_selected = values_graph[1]
+                # layout_selected = values_graph[2]
+                # activate_gene_color = values_graph[3]
+                # inactivate_gene_color = values_graph[4]
+                # activate_interaction_color = values_graph[5]
+                # inactivate_interaction_color = values_graph[6]
+                # width_interaction = values_graph[7]
+                # name_saved_file = values_graph[8]
+                #
+                # if event_graphs == 'Exit':
+                #     window_graphs.close()
+                #     active_2 = False
+                # if event_graphs == 'Save gene activity':
+                #     drawStateActivationGraph(genes_selected_visu, flow, genes_names_list)
+                #     window_graphs.close()
+                # if event_graphs == 'Launch visualization':
+                #     layout_graph = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Exit()]]
+                #
+                #     # define the window layout
+                #     # layout = [[sg.Text('Plot test', font='Any 18')],
+                #     #           [sg.Canvas(size=(figure), key='canvas')]]
+                #     #
+                #     # # create the form and show it without the plot
+                #     window_graph = sg.Window('Interaction Graph',
+                #                              layout_graph, finalize=True)
+                #
+                #     # if win3_active:
+                #     fig, G = drawGraph(genes_names_list, network_as_list, flow, graph_selected,
+                #                        layout_selected,
+                #                        activate_gene_color, inactivate_gene_color, activate_interaction_color,
+                #                        inactivate_interaction_color,
+                #                        width_interaction, genes_selected_visu)
+                #     # add the plot to the window
+                #     fig_canvas_agg = draw_figure(window_graph['-CANVAS-'].TKCanvas, fig)
+                #     fig.canvas.callbacks.connect('pick_event', on_pick)
+                #
+                #     canvas_elem = window_graph['-CANVAS-']
+                #     canvas = canvas_elem.TKCanvas
+                #     event, values = window_graph.read()
+                #     window_graph.close()
+                #     delete_figure_agg(fig_canvas_agg)
+                #
+                # if event_graphs == "Save graph":
+                #     saveData(network_as_list, flow, genes_names_list, name_saved_file)
+
+
+
+
         if run == False:
             break
