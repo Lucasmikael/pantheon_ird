@@ -17,6 +17,7 @@ def drawStateActivationGraph(genes_selected_visu, flow, genes_names_list):
                 plt.xlabel('State', fontsize=18)
                 plt.ylabel('ylabel', fontsize=16)
                 fig_plot.savefig(genes_selected_visu[i]+ " activity.png")
+                plt.close()
 
 
 

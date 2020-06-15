@@ -643,135 +643,63 @@ if __name__ == "__main__":
                     drawStateActivationGraph(genes_selected_visu, flow, genes_names_list)
 
                 if event_2 == 'Launch visualization':
-                    layout_graph = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Exit()]]
+                    active_Canva = True
+                    # layout_graph = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Exit()]]
+                    # window_graph = sg.Window('Interaction Graph',
+                    #                          layout_graph, finalize=True)
 
-                    # define the window layout
-                    # layout = [[sg.Text('Plot test', font='Any 18')],
-                    #           [sg.Canvas(size=(figure), key='canvas')]]
-                    #
-                    # # create the form and show it without the plot
-                    window_graph = sg.Window('Interaction Graph',
-                                             layout_graph, finalize=True)
 
-                    # if win3_active:
-                    fig, G = drawGraph(genes_names_list, network_as_list, flow, graph_selected,
+
+
+                    G = drawGraph(genes_names_list, network_as_list, flow, graph_selected,
                                        layout_selected,
                                        activate_gene_color, inactivate_gene_color, activate_interaction_color,
                                        inactivate_interaction_color,
-                                       width_interaction, genes_selected_visu)
-                    # add the plot to the window
-                    fig_canvas_agg = draw_figure(window_graph['-CANVAS-'].TKCanvas, fig)
-                    fig.canvas.callbacks.connect('pick_event', on_pick)
+                                       width_interaction, genes_selected_visu,1)
 
-                    canvas_elem = window_graph['-CANVAS-']
-                    canvas = canvas_elem.TKCanvas
-                    event, values = window_graph.read()
-                    window_graph.close()
-                    delete_figure_agg(fig_canvas_agg)
+
+
+
+
+
+                    # if win3_active:
+
 
                 if event_2 == "Save graph":
                     saveData(network_as_list, flow, genes_names_list, name_saved_file)
 
             if active_3:
                 event_3, values_3 = window_3.read(timeout = 100)
-                genes_selected_visu = values_3[0]
-                graph_selected = values_3[1]
-                layout_selected = values_3[2]
-                activate_gene_color = values_3[3]
-                inactivate_gene_color = values_3[4]
-                activate_interaction_color = values_3[5]
-                inactivate_interaction_color = values_3[6]
-                width_interaction = values_3[7]
-                name_saved_file = values_3[8]
+                genes_selected_visu_2 = values_3[0]
+                graph_selected_2 = values_3[1]
+                layout_selected_2 = values_3[2]
+                activate_gene_color_2 = values_3[3]
+                inactivate_gene_color_2 = values_3[4]
+                activate_interaction_color_2 = values_3[5]
+                inactivate_interaction_color_2 = values_3[6]
+                width_interaction_2 = values_3[7]
+                name_saved_file_2 = values_3[8]
                 if event_3 in (sg.WIN_CLOSED, 'Exit'):
                     active_3 = False
                     window_3.close()
 
 
                 if event_3 == 'Save gene activity':
-                    drawStateActivationGraph(genes_selected_visu, flow, genes_names_list)
+                    drawStateActivationGraph(genes_selected_visu_2, flow, genes_names_list)
 
                 if event_3 == 'Launch visualization':
-                    active_Canva_2 = True
-                    layout_graph_2 = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Exit()]]
-                    window_graph_2 = sg.Window('Interaction Graph',
-                                             layout_graph_2, finalize=True)
+                    print("try launch visu")
+                    G = drawGraph(genes_names_list, network_as_list, flow, graph_selected_2,
+                                       layout_selected_2,
+                                       activate_gene_color_2, inactivate_gene_color_2, activate_interaction_color_2,
+                                       inactivate_interaction_color_2,
+                                       width_interaction_2, genes_selected_visu_2,2)
                 if event_3 == "Save graph":
-                    saveData(network_as_list, flow, genes_names_list, name_saved_file)
-
-
-            if active_Canva_2 :     # if win3_active:
-                fig2, G2 = drawGraph(genes_names_list, network_as_list, flow, graph_selected,
-                                   layout_selected,
-                                   activate_gene_color, inactivate_gene_color, activate_interaction_color,
-                                   inactivate_interaction_color,
-                                   width_interaction, genes_selected_visu)
-                # add the plot to the window
-                fig_canvas_agg_2 = draw_figure(window_graph_2['-CANVAS-'].TKCanvas, fig2)
-                fig2.canvas.callbacks.connect('pick_event', on_pick)
-
-                canvas_elem_2 = window_graph_2['-CANVAS-']
-                canvas = canvas_elem.TKCanvas
-                event, values = window_graph_2.read()
-                window_graph_2.close()
-                delete_figure_agg(fig_canvas_agg_2)
+                    saveData(network_as_list, flow, genes_names_list, name_saved_file_2)
 
 
 
-
-
-
-
-                # event_graphs, values_graph = window_graphs.Read()
-                #
-                # genes_selected_visu = values_graph[0]
-                # graph_selected = values_graph[1]
-                # layout_selected = values_graph[2]
-                # activate_gene_color = values_graph[3]
-                # inactivate_gene_color = values_graph[4]
-                # activate_interaction_color = values_graph[5]
-                # inactivate_interaction_color = values_graph[6]
-                # width_interaction = values_graph[7]
-                # name_saved_file = values_graph[8]
-                #
-                # if event_graphs == 'Exit':
-                #     window_graphs.close()
-                #     active_2 = False
-                # if event_graphs == 'Save gene activity':
-                #     drawStateActivationGraph(genes_selected_visu, flow, genes_names_list)
-                #     window_graphs.close()
-                # if event_graphs == 'Launch visualization':
-                #     layout_graph = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Exit()]]
-                #
-                #     # define the window layout
-                #     # layout = [[sg.Text('Plot test', font='Any 18')],
-                #     #           [sg.Canvas(size=(figure), key='canvas')]]
-                #     #
-                #     # # create the form and show it without the plot
-                #     window_graph = sg.Window('Interaction Graph',
-                #                              layout_graph, finalize=True)
-                #
-                #     # if win3_active:
-                #     fig, G = drawGraph(genes_names_list, network_as_list, flow, graph_selected,
-                #                        layout_selected,
-                #                        activate_gene_color, inactivate_gene_color, activate_interaction_color,
-                #                        inactivate_interaction_color,
-                #                        width_interaction, genes_selected_visu)
-                #     # add the plot to the window
-                #     fig_canvas_agg = draw_figure(window_graph['-CANVAS-'].TKCanvas, fig)
-                #     fig.canvas.callbacks.connect('pick_event', on_pick)
-                #
-                #     canvas_elem = window_graph['-CANVAS-']
-                #     canvas = canvas_elem.TKCanvas
-                #     event, values = window_graph.read()
-                #     window_graph.close()
-                #     delete_figure_agg(fig_canvas_agg)
-                #
-                # if event_graphs == "Save graph":
-                #     saveData(network_as_list, flow, genes_names_list, name_saved_file)
-
-
-
+        plt.show(block = False)
 
         if run == False:
             break

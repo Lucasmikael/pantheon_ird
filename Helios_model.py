@@ -16,7 +16,7 @@ def createListPanelGraph(flow):
 
 
 def drawGraph(genes_names_list, network_as_list, flow, graph_selected, layout_selected, color_activate_node,
-              color_inactivate_node, color_active_edge, color_inactivate_edge, activate_widthedge,genes_selected_visu):
+              color_inactivate_node, color_active_edge, color_inactivate_edge, activate_widthedge,genes_selected_visu,number):
 
     G = nx.MultiDiGraph()
     value_source = getFlow(flow, graph_selected)
@@ -24,14 +24,14 @@ def drawGraph(genes_names_list, network_as_list, flow, graph_selected, layout_se
     # ajout des aretes et des noeuds
     G = addNodes(global_gene_state, G)
     G = addEdges(network_as_list, G)
-    fig, G = drawFig(G, global_gene_state, layout_selected, color_activate_node, color_inactivate_node,
-                     color_active_edge, color_inactivate_edge, activate_widthedge, genes_selected_visu)
+    G = drawFig(G, global_gene_state, layout_selected, color_activate_node, color_inactivate_node,
+                     color_active_edge, color_inactivate_edge, activate_widthedge, genes_selected_visu,number)
 
-    return fig, G
+    return G
 
 
 def drawFig(G, global_gene_state, layout_selected, color_activate_node, color_inactivate_node, color_active_edge,
-            color_inactivate_edge, activate_widthedge, genes_selected_visu):
+            color_inactivate_edge, activate_widthedge, genes_selected_visu,number):
     pos = selectLayout(G, layout_selected)
     for node in G.nodes(data=True):
         transparency = 1
@@ -44,13 +44,13 @@ def drawFig(G, global_gene_state, layout_selected, color_activate_node, color_in
         if node[1]['active_state'] == 0:
             color = color_inactivate_node
         if node[1]['active_state'] == 1:
-            color = color = color_activate_node
+            color = color_activate_node
         if genes_selected_visu :
             transparency = 0.5
             for i in range(len(genes_selected_visu)):
                 if genes_selected_visu[i] == node[0]:
                     transparency = 1
-        nx.draw_networkx_nodes(G, pos, nodelist=[node[0]], node_size=1500, node_shape=node_shape, node_color=color, alpha = transparency)
+        nx.draw_networkx_nodes(G, pos, nodelist=[node[0]], node_size=1500, node_shape= node_shape, node_color= color, alpha = transparency)
 
     nx.draw_networkx_labels(G, pos)
     for edge in G.edges(data=True):
@@ -77,13 +77,18 @@ def drawFig(G, global_gene_state, layout_selected, color_activate_node, color_in
 
         nx.draw_networkx_edges(G, pos, edgelist=[(edge[0], edge[1])], width=widthedge, arrowstyle=arrowstyle,
                                node_size=1900, connectionstyle=form_arrow, edge_color=activateedge)
-    # plt.show()
+    # plt.figure(number)
+    # plt.ion()
+    # plt.show(block = False)
 
     plt.gca().yaxis.set_minor_formatter(NullFormatter())
     plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0.25,
                         wspace=0.35)
-    fig = plt.gcf()
-    return fig, G
+    plt.figure(number)
+    plt.ioff()
+    plt.draw()
+    # fig = plt.gcf()
+    return G
 
 
 def getFlow(flow, graph_selected):
