@@ -90,17 +90,38 @@ def draw_figure(canvas, figure, loc=(0, 0)):
     return
 
 #------------------------------- Beginning of GUI CODE -------------------------------
+layout = [[sg.Button('Launch visualisation'), sg.Button('Launch visualisation 2')]]
 
+window = sg.Window('Have some Matplotlib....', layout)
+
+while True :
+    for i in range(2):
+        event, values = window.read(timeout=100)
+        if event == "Launch visualisation":
 # define the window layout
-layout = [[sg.Text('Plot test', font='Any 18')],
-          [sg.Canvas(key='canvas')],
-          [sg.OK(pad=((figure_w / 2, 0), 3), size=(4, 2))]]
+            layout = [[sg.Text('Plot test', font='Any 18')],
+                      [sg.Canvas(key='canvas')],
+                      [sg.OK(pad=((figure_w / 2, 0), 3), size=(4, 2))]]
 
-# create the form and show it without the plot
-window = sg.Window('Demo Application - Embedding Matplotlib In PySimpleGUI', force_toplevel=False).Layout(layout).Finalize()
+            # create the form and show it without the plot
+            window_graph = sg.Window('Demo Application - Embedding Matplotlib In PySimpleGUI', force_toplevel=False).Layout(layout).Finalize()
 
-# add the plot to the window
-fig_photo = draw_figure(window.FindElement('canvas').TKCanvas, fig)
+            # add the plot to the window
+            # fig_photo = draw_figure(window_graph.FindElement('canvas').TKCanvas, fig)
 
-# show it all again and get buttons
-event, values = window.Read()
+            # show it all again and get buttons
+            event_graph, values_graph = window_graph.Read()
+
+        if event == "Launch visualisation 2":
+            layout = [[sg.Text('Plot test', font='Any 18')],
+                      [sg.Canvas(key='canvas')],
+                      [sg.OK(pad=((figure_w / 2, 0), 3), size=(4, 2))]]
+
+            # create the form and show it without the plot
+            window_graph_2 = sg.Window('Demo Application - Embedding Matplotlib In PySimpleGUI', force_toplevel=False).Layout(layout).Finalize()
+
+            # add the plot to the window
+            # fig_photo = draw_figure(window_graph_2.FindElement('canvas').TKCanvas, fig)
+
+            # show it all again and get buttons
+            event_graph_2, values_graph_2 = window_graph_2.Read()

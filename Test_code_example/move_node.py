@@ -24,7 +24,12 @@ matplotlib.use("TkAgg")
 
 n = 50
 p = 0.15
-G = nx.binomial_graph(n,p)
+G = nx.MultiDiGraph()
+G.add_node("plop")
+G.add_node("plup")
+G.add_node("plip")
+G.add_edge("plop","plup")
+G.add_edge("plop","plip")
 #Gcc=nx.connected_component_subgraphs(G2)
 # print (G.edges())
 pos=nx.spring_layout(G, iterations=750)

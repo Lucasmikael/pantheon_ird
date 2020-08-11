@@ -565,7 +565,7 @@ if __name__ == "__main__":
                                        layout_selected,
                                        activate_gene_color, inactivate_gene_color, activate_interaction_color,
                                        inactivate_interaction_color,
-                                       width_interaction, genes_selected_visu)
+                                       width_interaction, genes_selected_visu,2)
                     # add the plot to the window
                     fig_canvas_agg = draw_figure(window_graph['-CANVAS-'].TKCanvas, fig)
                     fig.canvas.callbacks.connect('pick_event', on_pick)

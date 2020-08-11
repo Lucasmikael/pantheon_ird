@@ -13,9 +13,11 @@ def drawStateActivationGraph(genes_selected_visu, flow, genes_names_list):
 
                 fig_plot = plt.figure()
                 plt.plot(list_y,value_source)
-                fig_plot.suptitle("Activation graph of" +genes_selected_visu[i]+ " gene" , fontsize=20)
+                fig_plot.suptitle("Activation graph of " +genes_selected_visu[i]+ " gene" , fontsize=20)
                 plt.xlabel('State', fontsize=18)
-                plt.ylabel('ylabel', fontsize=16)
+                plt.ylabel('Activation', fontsize=16)
+                plt.yticks([0, 1])
+                plt.xticks(np.linspace(0,len(list_y)-1,len(list_y),endpoint=True))
                 fig_plot.savefig(genes_selected_visu[i]+ " activity.png")
                 plt.close()
 

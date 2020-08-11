@@ -1,5 +1,8 @@
 
 import PySimpleGUI as sg
+from PIL import Image
+import cv2 as cv
+import io
 from pythonis_filesIO import *
 from random_network import *
 from Helios_model import *
@@ -7,6 +10,7 @@ from Helios_Refactor_Pythonis import *
 from Helios_IO import *
 from Helios_addElement import *
 from Helios_geneGraph import *
+from Helios_displayView import *
 
 
 def layoutStart():
@@ -154,7 +158,7 @@ def layoutVisuGraph(list_panel, layout_graph_drawing, layout_color_drawing):
             [sg.Text('Width active Interaction', text_color='#e4e4e4', background_color='#343434',
                      tooltip='Value must a number'),
              sg.InputText(size=(5, 1), default_text="1")],
-            [sg.Button('Launch visualization')]],
+            [sg.Button('Launch visualization'),sg.Button('Display dynamic view')]],
             title='Vsualization settings', title_color='#e4e4e4',
             background_color='#343434', relief=sg.RELIEF_GROOVE)],
 
@@ -449,8 +453,12 @@ if __name__ == "__main__":
 
 
     run = True
+    FigOn = False
+    FigOn_2 = False
+    movie_created_1 = False
+    movie_created_2 = False
     while True :
-        for i in range(5):
+        for i in range(7):
             if active_1 :
                 event_visu, values_visu = window_visu.read(timeout=100)
 
@@ -525,10 +533,6 @@ if __name__ == "__main__":
                             initial_state_genes=genes_selected,
                             KO_genes=KO_genes_selected, OA_genes=OA_genes_selected)
 
-                        # resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename, network_filename,
-                        #        genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
-                        #        boundary_model_selected, network, initial_states, stable_states, data)
-
                     else:
                         sg.Popup(
                             'Please select value for number of initial states ( <<all>> or enter numerical value ) and run PYTHONIS again',
@@ -553,10 +557,7 @@ if __name__ == "__main__":
 
 
                 if event_visu == 'Run HELIOS 2' and not active_3:
-                    print("tentative")
                     active_3 = True
-
-                    print("genes selectionnes : ", genes_selected)
                     if all_initial_states_bool_visu:
                         flow, stable, start, stable_states, initial_states, genes_names, data, network, time = RunBooleanModelVisu(
                             genes_names=genes_names_list, genes_network=network_dictionary, initial_state_number='all',
@@ -577,10 +578,6 @@ if __name__ == "__main__":
                             model=boolean_model_selected, stimulus=boundary_model_selected,
                             initial_state_genes=genes_selected,
                             KO_genes=KO_genes_selected, OA_genes=OA_genes_selected)
-
-                        # resMod(genes_names_list, network_dictionary, start, flow, stable, genes_list_filename, network_filename,
-                        #        genes_names, KO_genes_selected, OA_genes_selected, boolean_model_selected,
-                        #        boundary_model_selected, network, initial_states, stable_states, data)
 
                     else:
                         sg.Popup(
@@ -604,25 +601,6 @@ if __name__ == "__main__":
 
                     window_3 = layoutVisuGraph(list_panel, layout_graph_drawing, layout_color_drawing)
 
-
-
-
-
-
-
-
-
-                # if event_1 == '1st Window'  and not active_2:
-                #     active_2 = True
-                #     window_2 = sg.Window("1st Window", layout1(),
-                #             location=(800, 400), finalize=True)
-                #
-                # if event_1 == '2nd Window'  and not active_3:
-                #         active_3 = True
-                #         window_3 = sg.Window("1st Window", layout2(),
-                #             location=(800, 400), finalize=True)
-
-
             if active_2:
                 event_2, values_2 = window_2.read(timeout = 100)
                 genes_selected_visu = values_2[0]
@@ -644,29 +622,94 @@ if __name__ == "__main__":
 
                 if event_2 == 'Launch visualization':
                     active_Canva = True
-                    # layout_graph = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Exit()]]
-                    # window_graph = sg.Window('Interaction Graph',
-                    #                          layout_graph, finalize=True)
+                    layout_graph = [[sg.Canvas(size=(800,800), key='-CANVAS2-'), sg.Exit()]]
+                    window_graph = sg.Window('Interaction Graph',
+                                             layout_graph, finalize=True)
 
-
-
-
-                    G = drawGraph(genes_names_list, network_as_list, flow, graph_selected,
+                    fig, G = drawGraph(genes_names_list, network_as_list, flow, graph_selected,
                                        layout_selected,
                                        activate_gene_color, inactivate_gene_color, activate_interaction_color,
                                        inactivate_interaction_color,
-                                       width_interaction, genes_selected_visu,1)
+                                       width_interaction, genes_selected_visu)
+                    fig_canvas_agg = draw_figure(window_graph['-CANVAS2-'].TKCanvas, fig)
+                    canvas_elem = window_graph['-CANVAS2-']
+                    canvas = canvas_elem.TKCanvas
+                    event, values = window_graph.read()
+                    window_graph.close()
+                    delete_figure_agg(fig_canvas_agg)
 
 
 
 
-
-
-                    # if win3_active:
-
+                    # if FigOn:
+                    #     fig_name_1.clf()
+                    # fig_name_1 ,G = drawGraph(genes_names_list, network_as_list, flow, graph_selected,
+                    #                    layout_selected,
+                    #                    activate_gene_color, inactivate_gene_color, activate_interaction_color,
+                    #                    inactivate_interaction_color,
+                    #                    width_interaction, genes_selected_visu,1, fig_name= "fig_1")
+                    # FigOn = True
 
                 if event_2 == "Save graph":
                     saveData(network_as_list, flow, genes_names_list, name_saved_file)
+
+                if event_2 == "Display dynamic view":
+                    if not movie_created_1 :
+                        for i in range (len(createListPanelGraph(flow))):
+                            fig,G = drawGraph(genes_names_list, network_as_list, flow, i,
+                                      layout_selected,
+                                      activate_gene_color, inactivate_gene_color, activate_interaction_color,
+                                      inactivate_interaction_color,
+                                      width_interaction, genes_selected_visu, 1, fig_name= "figure")
+
+                            fig.savefig("State " + str(i))
+                            plt.close(fig)
+                    print("plop")
+                    ################
+                    vidFile = cv.VideoCapture("test.mp4")
+                    # ---===--- Get some Stats --- #
+                    num_frames = vidFile.get(cv.CAP_PROP_FRAME_COUNT)
+                    fps = vidFile.get(cv.CAP_PROP_FPS)
+                    print("ploop")
+
+                    sg.theme('Black')
+
+                    # ---===--- define the window layout --- #
+                    layout = [[sg.Image(filename='', key='-image-')],
+                              [sg.Slider(range=(0, num_frames),
+                                         size=(60, 10), orientation='h', key='-slider-')],
+                              [sg.Button('Exit', size=(7, 1), pad=((600, 0), 3), font='Helvetica 14')]]
+
+                    # create the window and show it without the plot
+                    window_view = sg.Window('Dynamic View', layout, no_titlebar=False, location=(0, 0))
+
+                    # locate the elements we'll be updating. Does the search only 1 time
+                    image_elem = window_view['-image-']
+                    slider_elem = window_view['-slider-']
+
+                    # ---===--- LOOP through video file by frame --- #
+                    cur_frame = 0
+                    while vidFile.isOpened():
+                        event_view, values_view = window_view.read(timeout=0)
+                        if event_view in ('Exit', None):
+                            break
+                        ret, frame = vidFile.read()
+                        if not ret:  # if out of data stop looping
+                            break
+                        # if someone moved the slider manually, the jump to that frame
+                        if int(values_view['-slider-']) != cur_frame - 1:
+                            cur_frame = int(values_view['-slider-'])
+                            vidFile.set(cv.CAP_PROP_POS_FRAMES, cur_frame)
+                        slider_elem.update(cur_frame)
+                        cur_frame += 1
+
+                        imgbytes = cv.imencode('.png', frame)[1].tobytes()  # ditto
+                        image_elem.update(data=imgbytes)
+
+                    ######################
+
+
+
 
             if active_3:
                 event_3, values_3 = window_3.read(timeout = 100)
@@ -688,18 +731,32 @@ if __name__ == "__main__":
                     drawStateActivationGraph(genes_selected_visu_2, flow, genes_names_list)
 
                 if event_3 == 'Launch visualization':
-                    print("try launch visu")
-                    G = drawGraph(genes_names_list, network_as_list, flow, graph_selected_2,
+                    active_Canva_2 = True
+                    layout_graph_2 = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Exit()]]
+                    window_graph_2 = sg.Window('Interaction Graph',
+                                             layout_graph_2, finalize=True)
+                    fig_2, G = drawGraph(genes_names_list, network_as_list, flow, graph_selected_2,
                                        layout_selected_2,
                                        activate_gene_color_2, inactivate_gene_color_2, activate_interaction_color_2,
                                        inactivate_interaction_color_2,
-                                       width_interaction_2, genes_selected_visu_2,2)
+                                       width_interaction_2, genes_selected_visu_2)
+                    # add the plot to the window
+                    fig_canvas_agg = draw_figure(window_graph_2['-CANVAS-'].TKCanvas, fig_2)
+                    canvas_elem = window_graph_2['-CANVAS-']
+                    canvas = canvas_elem.TKCanvas
+                    event, values = window_graph_2.read()
+                    window_graph_2.close()
+                    delete_figure_agg(fig_canvas_agg)
+                    # fig_2, G = drawGraph(genes_names_list, network_as_list, flow, graph_selected_2,
+                    #                    layout_selected_2,
+                    #                    activate_gene_color_2, inactivate_gene_color_2, activate_interaction_color_2,
+                    #                    inactivate_interaction_color_2,
+                    #                    width_interaction_2, genes_selected_visu_2, 1, fig_name= "fig_2")
+                    #
+                    # FigOn = True
                 if event_3 == "Save graph":
                     saveData(network_as_list, flow, genes_names_list, name_saved_file_2)
 
-
-
-        plt.show(block = False)
 
         if run == False:
             break

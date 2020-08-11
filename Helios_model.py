@@ -8,6 +8,7 @@ from pythonis_model import *
 import networkx as nx
 
 
+
 def createListPanelGraph(flow):
     list_panel = []
     for i in range(len(flow)):
@@ -16,7 +17,7 @@ def createListPanelGraph(flow):
 
 
 def drawGraph(genes_names_list, network_as_list, flow, graph_selected, layout_selected, color_activate_node,
-              color_inactivate_node, color_active_edge, color_inactivate_edge, activate_widthedge,genes_selected_visu,number):
+              color_inactivate_node, color_active_edge, color_inactivate_edge, activate_widthedge,genes_selected_visu):
 
     G = nx.MultiDiGraph()
     value_source = getFlow(flow, graph_selected)
@@ -25,13 +26,13 @@ def drawGraph(genes_names_list, network_as_list, flow, graph_selected, layout_se
     G = addNodes(global_gene_state, G)
     G = addEdges(network_as_list, G)
     G = drawFig(G, global_gene_state, layout_selected, color_activate_node, color_inactivate_node,
-                     color_active_edge, color_inactivate_edge, activate_widthedge, genes_selected_visu,number)
+                     color_active_edge, color_inactivate_edge, activate_widthedge, genes_selected_visu)
 
     return G
 
 
 def drawFig(G, global_gene_state, layout_selected, color_activate_node, color_inactivate_node, color_active_edge,
-            color_inactivate_edge, activate_widthedge, genes_selected_visu,number):
+            color_inactivate_edge, activate_widthedge, genes_selected_visu):
     pos = selectLayout(G, layout_selected)
     for node in G.nodes(data=True):
         transparency = 1
@@ -84,11 +85,12 @@ def drawFig(G, global_gene_state, layout_selected, color_activate_node, color_in
     plt.gca().yaxis.set_minor_formatter(NullFormatter())
     plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0.25,
                         wspace=0.35)
-    plt.figure(number)
+    # fig_name = plt.figure()
     plt.ioff()
+    # plt.ion()
     plt.draw()
-    # fig = plt.gcf()
-    return G
+    fig = plt.gcf()
+    return fig,G
 
 
 def getFlow(flow, graph_selected):
