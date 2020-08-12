@@ -449,7 +449,7 @@ if __name__ == "__main__":
 
     window_visu = layoutBooleanModelVisu()
 
-    active_1, active_2, active_3, active_Canva, active_Canva_2 = True, False, False, False, False
+    active_1, active_2, active_3, active_4, active_Canva, active_Canva_2, active_Canva_3 = True, False, False, False, False, False,False
 
 
     run = True
@@ -457,6 +457,20 @@ if __name__ == "__main__":
     FigOn_2 = False
     movie_created_1 = False
     movie_created_2 = False
+
+    layout_graph_drawing = [
+        'circular_layout',
+        'kamada_kawai_layout',
+        'random_layout',
+        'shell_layout',
+        'spring_layout',
+        'spectral_layout',
+        'planar_layout',
+        'fruchterman_reingold_layout',
+        'spiral_layout']
+
+    layout_color_drawing = ["blue", "orange", "green", "red", "purple", "brown", "pink", "grey", "olive",
+                            "cyan", "black"]
     while True :
         for i in range(7):
             if active_1 :
@@ -496,9 +510,11 @@ if __name__ == "__main__":
                 if event_visu in (sg.WIN_CLOSED, 'Exit'):
                     run = False
                     break
-                if event_visu == "Load":
-                    interaction_table, node_table = openData(load_saved_file)
+                if event_visu == "Load" and not active_4 :
+                    active_4 = True
+                    interaction_table, node_table , list_panel_loading  = openData(load_saved_file)
                     print("import done")
+                    window_4 = layoutVisuGraph(list_panel_loading, layout_graph_drawing, layout_color_drawing)
                 if event_visu == 'Add element':
                     source_gene_list, interaction_list, target_gene_list = catchGUIElement(source_gene_add, interaction_add, target_gene_add)
                     genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
@@ -539,19 +555,19 @@ if __name__ == "__main__":
                             no_titlebar=True, background_color='#343434')
 
                     list_panel = createListPanelGraph(flow)
-                    layout_graph_drawing = [
-                        'circular_layout',
-                        'kamada_kawai_layout',
-                        'random_layout',
-                        'shell_layout',
-                        'spring_layout',
-                        'spectral_layout',
-                        'planar_layout',
-                        'fruchterman_reingold_layout',
-                        'spiral_layout']
-
-                    layout_color_drawing = ["blue", "orange", "green", "red", "purple", "brown", "pink", "grey", "olive",
-                                            "cyan", "black"]
+                    # layout_graph_drawing = [
+                    #     'circular_layout',
+                    #     'kamada_kawai_layout',
+                    #     'random_layout',
+                    #     'shell_layout',
+                    #     'spring_layout',
+                    #     'spectral_layout',
+                    #     'planar_layout',
+                    #     'fruchterman_reingold_layout',
+                    #     'spiral_layout']
+                    #
+                    # layout_color_drawing = ["blue", "orange", "green", "red", "purple", "brown", "pink", "grey", "olive",
+                    #                         "cyan", "black"]
 
                     window_2 = layoutVisuGraph(list_panel, layout_graph_drawing, layout_color_drawing)
 
@@ -585,19 +601,19 @@ if __name__ == "__main__":
                             no_titlebar=True, background_color='#343434')
 
                     list_panel = createListPanelGraph(flow)
-                    layout_graph_drawing = [
-                        'circular_layout',
-                        'kamada_kawai_layout',
-                        'random_layout',
-                        'shell_layout',
-                        'spring_layout',
-                        'spectral_layout',
-                        'planar_layout',
-                        'fruchterman_reingold_layout',
-                        'spiral_layout']
-
-                    layout_color_drawing = ["blue", "orange", "green", "red", "purple", "brown", "pink", "grey", "olive",
-                                            "cyan", "black"]
+                    # layout_graph_drawing = [
+                    #     'circular_layout',
+                    #     'kamada_kawai_layout',
+                    #     'random_layout',
+                    #     'shell_layout',
+                    #     'spring_layout',
+                    #     'spectral_layout',
+                    #     'planar_layout',
+                    #     'fruchterman_reingold_layout',
+                    #     'spiral_layout']
+                    #
+                    # layout_color_drawing = ["blue", "orange", "green", "red", "purple", "brown", "pink", "grey", "olive",
+                    #                         "cyan", "black"]
 
                     window_3 = layoutVisuGraph(list_panel, layout_graph_drawing, layout_color_drawing)
 
@@ -647,7 +663,7 @@ if __name__ == "__main__":
                     #                    layout_selected,
                     #                    activate_gene_color, inactivate_gene_color, activate_interaction_color,
                     #                    inactivate_interaction_color,
-                    #                    width_interaction, genes_selected_visu,1, fig_name= "fig_1")
+                    #                    width_interaction, genes_selected_visu,1, fig_name= "fig_1"
                     # FigOn = True
 
                 if event_2 == "Save graph":
@@ -756,6 +772,53 @@ if __name__ == "__main__":
                     # FigOn = True
                 if event_3 == "Save graph":
                     saveData(network_as_list, flow, genes_names_list, name_saved_file_2)
+
+            if active_4:
+                event_4, values_4 = window_4.read(timeout = 100)
+                genes_selected_visu_3 = values_4[0]
+                graph_selected_3 = values_4[1]
+                layout_selected_3 = values_4[2]
+                activate_gene_color_3 = values_4[3]
+                inactivate_gene_color_3 = values_4[4]
+                activate_interaction_color_3 = values_4[5]
+                inactivate_interaction_color_3 = values_4[6]
+                width_interaction_3 = values_4[7]
+                name_saved_file_3 = values_4[8]
+                if event_4 in (sg.WIN_CLOSED, 'Exit'):
+                    active_4 = False
+                    window_4.close()
+
+
+                if event_4 == 'Save gene activity':
+                    drawStateActivationGraph(genes_selected_visu_3, flow, genes_names_list)
+
+                if event_4 == 'Launch visualization':
+                    active_Canva_3 = True
+                    layout_graph_3 = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Exit()]]
+                    window_graph_3 = sg.Window('Interaction Graph',
+                                             layout_graph_3, finalize=True)
+
+                    fig_3, G = drawLoadGraph(layout_selected_3, interaction_table, node_table, graph_selected_3, activate_gene_color_3,
+                                      inactivate_gene_color_3, activate_interaction_color_3, inactivate_interaction_color_3, width_interaction_3, genes_selected_visu_3)
+
+
+
+                    # add the plot to the window
+                    fig_canvas_agg = draw_figure(window_graph_3['-CANVAS-'].TKCanvas, fig_3)
+                    canvas_elem = window_graph_3['-CANVAS-']
+                    canvas = canvas_elem.TKCanvas
+                    event, values = window_graph_3.read()
+                    window_graph_3.close()
+                    delete_figure_agg(fig_canvas_agg)
+                    # fig_2, G = drawGraph(genes_names_list, network_as_list, flow, graph_selected_2,
+                    #                    layout_selected_2,
+                    #                    activate_gene_color_2, inactivate_gene_color_2, activate_interaction_color_2,
+                    #                    inactivate_interaction_color_2,
+                    #                    width_interaction_2, genes_selected_visu_2, 1, fig_name= "fig_2")
+                    #
+                    # FigOn = True
+                # if event_3 == "Save graph":
+                #     saveData(network_as_list, flow, genes_names_list, name_saved_file_2)
 
 
         if run == False:

@@ -1,83 +1,116 @@
-def function_1(values):
-    pass
-...
-call_1 = {key_11:function_11, key_2:function_12, ..., keyn:function_1n}
-call_2 = ...
-call_3 = ...
-active_1, active_2, active_3 = True, False, False
-event_1, event_2, event_3 = None, None, None
-
-
-
-
-while True:
-    if active_1:
-        event_1, values_1 = window_1.read(timeout=50)
-    if active_2:
-        event_2, values_2 = window_2.read(timeout=50)
-    if active_3:
-        event_3, values_3 = window_3.read(timeout=50)
-    statements for break
-    if event_1 in call_1:
-        call_1[event_1](values1)
-    if event_2 in call_2:
-        call_2[event_2](values1)
-    if event_3 in call_3:
-        call_3[event_3](values3)
-statements for window close
-
-
-
-
-
+#!/usr/bin/env python
 import PySimpleGUI as sg
+import os
+from PIL import Image, ImageTk
+import io
 
-sg.theme('Dark Blue 3')
+"""
+Simple Image Browser based on PySimpleGUI
+--------------------------------------------
+There are some improvements compared to the PNG browser of the repository:
+1. Paging is cyclic, i.e. automatically wraps around if file index is outside
+2. Supports all file types that are valid PIL images
+3. Limits the maximum form size to the physical screen
+4. When selecting an image from the listbox, subsequent paging uses its index
+5. Paging performance improved significantly because of using PIL
+Dependecies
+------------
+Python3
+PIL
+"""
 
-def layout1():
-    return [[sg.Text('This is the 1st WINDOW', font=font)],
-            [sg.Button('Exit1', font=font)]]
+# Get the folder containin:g the images from the user
+folder = sg.popup_get_folder('Image folder to open', default_path='')
+if not folder:
+    sg.popup_cancel('Cancelling')
+    raise SystemExit()
 
-def layout2():
-    return [[sg.Text('This is the 2nd WINDOW', font=font)],
-            [sg.Button('Exit2', font=font)]]
+# PIL supported image types
+img_types = (".png", ".jpg", "jpeg", ".tiff", ".bmp")
 
-font = ("Helvetica", 16)
-layout = [[sg.Text('Main WINDOW', font=font),
-           sg.Button('Exit', font=font)],
-          [sg.Button('1st Window', font=font),
-           sg.Button('2nd Window', font=font)]]
+# get list of files in folder
+flist0 = os.listdir(folder)
 
-window0 = sg.Window('Window Title', layout, location=(800,200))
-window  = [window0, None, None]
-active  = [True, False, False]
-event   = [None, None, None]
-values  = [None, None, None]
+# create sub list of image files (no sub folders, no wrong file types)
+fnames = [f for f in flist0 if os.path.isfile(
+    os.path.join(folder, f)) and f.lower().endswith(img_types)]
 
+num_files = len(fnames)                # number of iamges found
+if num_files == 0:
+    sg.popup('No files in folder')
+    raise SystemExit()
+
+del flist0                             # no longer needed
+
+# ------------------------------------------------------------------------------
+# use PIL to read data of one image
+# ------------------------------------------------------------------------------
+
+
+def get_img_data(f, maxsize=(1200, 850), first=False):
+    """Generate image data using PIL
+    """
+    img = Image.open(f)
+    img.thumbnail(maxsize)
+    if first:                     # tkinter is inactive the first time
+        bio = io.BytesIO()
+        img.save(bio, format="PNG")
+        del img
+        return bio.getvalue()
+    return ImageTk.PhotoImage(img)
+# ------------------------------------------------------------------------------
+
+
+# make these 2 elements outside the layout as we want to "update" them later
+# initialize to the first file in the list
+filename = os.path.join(folder, fnames[0])  # name of first file in list
+image_elem = sg.Image(data=get_img_data(filename, first=True))
+filename_display_elem = sg.Text(filename, size=(80, 3))
+file_num_display_elem = sg.Text('File 1 of {}'.format(num_files), size=(15, 1))
+
+# define layout, show and read the form
+col = [[filename_display_elem],
+       [image_elem]]
+
+col_files = [[sg.Listbox(values=fnames, change_submits=True, size=(60, 30), key='listbox')],
+             [sg.Button('Next', size=(8, 2)), sg.Button('Prev', size=(8, 2)), file_num_display_elem]]
+
+layout = [[sg.Column(col_files), sg.Column(col)]]
+
+window = sg.Window('Image Browser', layout, return_keyboard_events=True,
+                   location=(0, 0), use_default_focus=False)
+
+# loop reading the user input and displaying image, filename
+i = 0
 while True:
-    for i in range(3):
-        if active[0]:
-            event[i], values[i] = window[i].read(timeout=50)
-            if event[i] != sg.TIMEOUT_KEY:
-                print(f'Window {i} event:{event[i]}, values:{values[i]}')
-            if event[i] in (sg.WIN_CLOSED, 'Exit', 'Exit1', 'Exit2'):
-                if i == 0:
-                    for j in range(2,-1, -1):
-                        if active[j]:
-                            active[j] = False
-                            window[j].close()
-                    window = None
-                    exit()
-                else:
-                    active[i] = False
-                    window[i].close()
-            elif event[i] == '1st Window':
-                if not active[1]:
-                    active[1] = True
-                    window[1] = sg.Window("1st Window", layout1(),
-                        location=(800, 400), finalize=True)
-            elif event[i] == '2nd Window':
-                if not active[2]:
-                    active[2] = True
-                    window[2] = sg.Window("2nd Window", layout2(),
-                        location=(800, 600), finalize=True)
+    # read the form
+    event, values = window.read()
+    print(event, values)
+    # perform button and keyboard operations
+    if event == sg.WIN_CLOSED:
+        break
+    elif event in ('Next', 'MouseWheel:Down', 'Down:40', 'Next:34'):
+        i += 1
+        if i >= num_files:
+            i -= num_files
+        filename = os.path.join(folder, fnames[i])
+    elif event in ('Prev', 'MouseWheel:Up', 'Up:38', 'Prior:33'):
+        i -= 1
+        if i < 0:
+            i = num_files + i
+        filename = os.path.join(folder, fnames[i])
+    elif event == 'listbox':            # something from the listbox
+        f = values["listbox"][0]            # selected filename
+        filename = os.path.join(folder, f)  # read this file
+        i = fnames.index(f)                 # update running index
+    else:
+        filename = os.path.join(folder, fnames[i])
+
+    # update window with new image
+    image_elem.update(data=get_img_data(filename, first=True))
+    # update window with filename
+    filename_display_elem.update(filename)
+    # update page display
+    file_num_display_elem.update('File {} of {}'.format(i+1, num_files))
+
+window.close()
