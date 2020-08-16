@@ -71,23 +71,14 @@ def drawFig(G, global_gene_state, layout_selected, color_activate_node, color_in
                 else:
                     activateedge = color_inactivate_edge
                     widthedge = 1
-        # if edge[2]['activation'] == 1:
-        #     activateedge = "r"
-        # if edge[2]['activation'] == 2:
-        #     activateedge = "b"
 
         nx.draw_networkx_edges(G, pos, edgelist=[(edge[0], edge[1])], width=widthedge, arrowstyle=arrowstyle,
                                node_size=1900, connectionstyle=form_arrow, edge_color=activateedge)
-    # plt.figure(number)
-    # plt.ion()
-    # plt.show(block = False)
 
     plt.gca().yaxis.set_minor_formatter(NullFormatter())
     plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0.25,
                         wspace=0.35)
-    # fig_name = plt.figure()
     plt.ioff()
-    # plt.ion()
     plt.draw()
     fig = plt.gcf()
     return fig,G
@@ -105,19 +96,6 @@ def getFlow(flow, graph_selected):
             for number in source:
                 value_source.append(number)
             return value_source
-
-
-# def activationFlowTable (value_source, genes_name_list):
-#     all_values = []
-#     for i in range(len(genes_name_list)):
-#         pair_values = []
-#         pair_values.append(genes_name_list[i])
-#         pair_values.append(value_source[i])
-#         all_values.append(pair_values)
-#
-#     print(all_values)
-#     return all_values
-
 
 def getRegulationActivation(network_as_list, genes_names_list, value_source):
     positive_gene = []
@@ -161,13 +139,6 @@ def addEdges(network_as_list, G):
         for k in range(len(network_as_list)):
             if network_as_list[k][0] == gene_target and network_as_list[k][2] == gene_source:
                 duet = "1"
-
-            # if activation_table[k][1] == 1:
-            #     activateedge = "r"
-            #     print(activateedge)
-            # if activation_table[k][1] == 0 :
-            #     activateedge = "b"
-            #     print(activateedge)
         G.add_edge(gene_source, gene_target, arrowstyle=interaction, duet=duet)
 
     return G
@@ -217,11 +188,3 @@ def draw_figure(canvas, figure, loc=(0, 0)):
 def delete_figure_agg(figure_agg):
     figure_agg.get_tk_widget().forget()
     plt.close('all')
-
-# ------------------------------- Beginning of INTERACTIVE CODE -------------------------------
-def on_pick(event):
-    artist = event.artist
-    xmouse, ymouse = event.mouseevent.xdata, event.mouseevent.ydata
-    x, y = artist.get_xdata(), artist.get_ydata()
-    ind = event.ind
-    print('Artist picked:', event.artist)

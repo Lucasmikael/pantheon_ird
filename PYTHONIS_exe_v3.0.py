@@ -124,7 +124,6 @@ def layoutBooleanModelVisu():
     layout_visu = [
         [sg.Column(col_visu1, background_color='#343434'), sg.Column(col_visu2, background_color='#343434'),
          sg.Column(col_visu3, background_color='#343434')],
-        [sg.Text('Extract core network :', text_color='#e4e4e4', background_color='#343434')],
         [sg.Exit()]]
 
     window_visu = sg.Window("Initialize Network", alpha_channel=0.95, layout=layout_visu)
@@ -169,41 +168,19 @@ def layoutVisuGraph(list_panel, layout_graph_drawing, layout_color_drawing):
             title='Save Data', title_color='#e4e4e4',
             background_color='#343434', relief=sg.RELIEF_GROOVE,tooltip='The file extension CSV will be automatically added')],
         [sg.Frame(layout=[
-            [sg.Button('Save gene activity'), sg.Button("Save as video")]],
+            [sg.Button('Save gene activity'), sg.Button("Save as video"), sg.InputText(size = (35,1))]],
             title='Save gene activity graph', title_color='#e4e4e4',
             background_color='#343434', relief=sg.RELIEF_GROOVE,
-            tooltip='The file extension CSV will be automatically added')],
+            tooltip='Save as mp4')],
         [sg.Text('', background_color='#343434')]]
 
     layout_graphs = [
         [sg.Column(col_graphs1, background_color='#343434'),
          sg.Column(col_graphs2, background_color='#343434')],
-        [sg.Text('Extract core network :', text_color='#e4e4e4', background_color='#343434')],
         [sg.Exit()]]
 
     window_graphs = sg.Window("Initialize Network", alpha_channel=0.95, layout=layout_graphs)
     return window_graphs
-
-
-
-
-
-
-
-
-
-
-def layout1():
-    return [[sg.Text('This is the 1st WINDOW')],
-            [sg.Button('Exit1')]]
-
-def layout2():
-    return [[sg.Text('This is the 2nd WINDOW')],
-            [sg.Button('Exit2')]]
-
-
-
-
 
 
 
@@ -512,10 +489,7 @@ if __name__ == "__main__":
                 if event_visu in (sg.WIN_CLOSED, 'Exit'):
                     run = Falsef
                     break
-                if event_visu == "Load" and not active_4 :
-                    active_4 = True
-                    interaction_table, node_table , list_panel_loading  = openData(load_saved_file)
-                    window_4 = layoutVisuGraph(list_panel_loading, layout_graph_drawing, layout_color_drawing)
+
                 if event_visu == 'Add element':
                     source_gene_list, interaction_list, target_gene_list = catchGUIElement(source_gene_add, interaction_add, target_gene_add)
                     genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
@@ -524,6 +498,10 @@ if __name__ == "__main__":
                     source_gene_list, interaction_list, target_gene_list = addElementfromCSV(CSV_element_add)
                     genes_names_list, network_dictionary, network_as_list = addElement(network_dictionary, genes_names_list,
                                                                                        network_as_list, source_gene_list, interaction_list,target_gene_list)
+                if event_visu == "Load" and not active_4 :
+                    active_4 = True
+                    interaction_table, node_table , list_panel_loading  = openData(load_saved_file)
+                    window_4 = layoutVisuGraph(list_panel_loading, layout_graph_drawing, layout_color_drawing)
 
                 if event_visu == 'Run HELIOS' and not active_2 :   # only run if not already showing a window2
                     active_2 = True
@@ -556,22 +534,7 @@ if __name__ == "__main__":
                             no_titlebar=True, background_color='#343434')
 
                     list_panel = createListPanelGraph(flow)
-                    # layout_graph_drawing = [
-                    #     'circular_layout',
-                    #     'kamada_kawai_layout',
-                    #     'random_layout',
-                    #     'shell_layout',
-                    #     'spring_layout',
-                    #     'spectral_layout',
-                    #     'planar_layout',
-                    #     'fruchterman_reingold_layout',
-                    #     'spiral_layout']
-                    #
-                    # layout_color_drawing = ["blue", "orange", "green", "red", "purple", "brown", "pink", "grey", "olive",
-                    #                         "cyan", "black"]
-
                     window_2 = layoutVisuGraph(list_panel, layout_graph_drawing, layout_color_drawing)
-
 
                 if event_visu == 'Run HELIOS 2' and not active_3:
                     active_3 = True
@@ -602,20 +565,6 @@ if __name__ == "__main__":
                             no_titlebar=True, background_color='#343434')
 
                     list_panel = createListPanelGraph(flow)
-                    # layout_graph_drawing = [
-                    #     'circular_layout',
-                    #     'kamada_kawai_layout',
-                    #     'random_layout',
-                    #     'shell_layout',
-                    #     'spring_layout',
-                    #     'spectral_layout',
-                    #     'planar_layout',
-                    #     'fruchterman_reingold_layout',
-                    #     'spiral_layout']
-                    #
-                    # layout_color_drawing = ["blue", "orange", "green", "red", "purple", "brown", "pink", "grey", "olive",
-                    #                         "cyan", "black"]
-
                     window_3 = layoutVisuGraph(list_panel, layout_graph_drawing, layout_color_drawing)
 
             if active_2:
@@ -629,6 +578,7 @@ if __name__ == "__main__":
                 inactivate_interaction_color = values_2[6]
                 width_interaction = values_2[7]
                 name_saved_file = values_2[8]
+                name_saved_movie = values_2[9]
                 if event_2 in (sg.WIN_CLOSED, 'Exit'):
                     active_2 = False
                     window_2.close()
@@ -654,10 +604,12 @@ if __name__ == "__main__":
                     event, values = window_graph.read()
                     window_graph.close()
                     delete_figure_agg(fig_canvas_agg)
+                if event_2 == "Save graph":
+                    saveData(network_as_list, flow, genes_names_list, name_saved_file)
+
 
                 if event_2 == "Save as video" :
-
-                    folder = createFolderSave()
+                    folder_png = createFolderSave()
                     for state in list_panel :
                         fig, G = drawGraph(genes_names_list, network_as_list, flow, state,
                                            layout_selected,
@@ -665,32 +617,21 @@ if __name__ == "__main__":
                                            inactivate_interaction_color,
                                            width_interaction, genes_selected_visu)
                         savePNG(fig, state)
-                    createVideo(folder)
-                    deleteFolder(folder)
-
-
-
-
-
-
-
-
-                    # if FigOn:
-                    #     fig_name_1.clf()
-                    # fig_name_1 ,G = drawGraph(genes_names_list, network_as_list, flow, graph_selected,
-                    #                    layout_selected,
-                    #                    activate_gene_color, inactivate_gene_color, activate_interaction_color,
-                    #                    inactivate_interaction_color,
-                    #                    width_interaction, genes_selected_visu,1, fig_name= "fig_1"
-                    # FigOn = True
-
-                if event_2 == "Save graph":
-                    saveData(network_as_list, flow, genes_names_list, name_saved_file)
+                    createVideo(folder_png, name_saved_movie)
+                    deleteFolder(folder_png)
 
                 if event_2 == "Display dynamic view":
-
-                    ################
-                    vidFile = cv.VideoCapture("test.mp4")
+                    folder_png = createFolderSave()
+                    for state in list_panel :
+                        fig, G = drawGraph(genes_names_list, network_as_list, flow, state,
+                                           layout_selected,
+                                           activate_gene_color, inactivate_gene_color, activate_interaction_color,
+                                           inactivate_interaction_color,
+                                           width_interaction, genes_selected_visu)
+                        savePNG(fig, state)
+                    createVideo(folder_png, "Helios_movie_1.mp4")
+                    deleteFolder(folder_png)
+                    vidFile = cv.VideoCapture("Helios_movie_1.mp4")
                     # ---===--- Get some Stats --- #
                     num_frames = vidFile.get(cv.CAP_PROP_FRAME_COUNT)
                     fps = vidFile.get(cv.CAP_PROP_FPS)
@@ -740,6 +681,7 @@ if __name__ == "__main__":
                 inactivate_interaction_color_2 = values_3[6]
                 width_interaction_2 = values_3[7]
                 name_saved_file_2 = values_3[8]
+                name_saved_movie_2 = values_3[9]
                 if event_3 in (sg.WIN_CLOSED, 'Exit'):
                     active_3 = False
                     window_3.close()
@@ -770,7 +712,7 @@ if __name__ == "__main__":
                     saveData(network_as_list, flow, genes_names_list, name_saved_file_2)
 
                 if event_3 == "Save as video" :
-                    folder = createFolderSave()
+                    folder_png = createFolderSave()
                     for state_2 in list_panel :
                         fig_2, G = drawGraph(genes_names_list, network_as_list, flow, state_2,
                                            layout_selected_2,
@@ -778,13 +720,22 @@ if __name__ == "__main__":
                                            inactivate_interaction_color_2,
                                            width_interaction_2, genes_selected_visu_2)
                         savePNG(fig_2, state_2)
-                    createVideo(folder)
-                    deleteFolder(folder)
+                    createVideo(folder_png, name_saved_movie_2)
+                    deleteFolder(folder_png)
 
                 if event_3 == "Display dynamic view":
+                    folder_png = createFolderSave()
+                    for state_2 in list_panel :
+                        fig_2, G = drawGraph(genes_names_list, network_as_list, flow, state_2,
+                                           layout_selected_2,
+                                           activate_gene_color_2, inactivate_gene_color_2, activate_interaction_color_2,
+                                           inactivate_interaction_color_2,
+                                           width_interaction_2, genes_selected_visu_2)
+                        savePNG(fig_2, state_2)
+                    createVideo(folder_png, "Helios_movie_2.mp4")
+                    deleteFolder(folder_png)
 
-                    ################
-                    vidFile = cv.VideoCapture("test.mp4")
+                    vidFile = cv.VideoCapture("Helios_movie_2.mp4")
                     # ---===--- Get some Stats --- #
                     num_frames = vidFile.get(cv.CAP_PROP_FRAME_COUNT)
                     fps = vidFile.get(cv.CAP_PROP_FPS)
@@ -831,10 +782,10 @@ if __name__ == "__main__":
                 inactivate_interaction_color_3 = values_4[6]
                 width_interaction_3 = values_4[7]
                 name_saved_file_3 = values_4[8]
+                name_saved_movie_3 = values_4[9]
                 if event_4 in (sg.WIN_CLOSED, 'Exit'):
                     active_4 = False
                     window_4.close()
-
 
                 if event_4 == 'Save gene activity':
                     drawStateActivationGraph(genes_selected_visu_3, flow, genes_names_list)
@@ -847,9 +798,6 @@ if __name__ == "__main__":
 
                     fig_3, G = drawLoadGraph(layout_selected_3, interaction_table, node_table, graph_selected_3, activate_gene_color_3,
                                       inactivate_gene_color_3, activate_interaction_color_3, inactivate_interaction_color_3, width_interaction_3, genes_selected_visu_3)
-
-
-
                     # add the plot to the window
                     fig_canvas_agg = draw_figure(window_graph_3['-CANVAS-'].TKCanvas, fig_3)
                     canvas_elem = window_graph_3['-CANVAS-']
@@ -859,18 +807,26 @@ if __name__ == "__main__":
                     delete_figure_agg(fig_canvas_agg)
 
                 if event_4 == "Save as video" :
-                    folder = createFolderSave()
+                    folder_png = createFolderSave()
                     for state_3 in list_panel_loading :
                         fig_3, G = drawLoadGraph(layout_selected_3, interaction_table, node_table, state_3, activate_gene_color_3,
                                           inactivate_gene_color_3, activate_interaction_color_3, inactivate_interaction_color_3, width_interaction_3, genes_selected_visu_3)
                         savePNG(fig_3, state_3)
-                    createVideo(folder)
-                    deleteFolder(folder)
+                    createVideo(folder_png, name_saved_movie_3)
+                    deleteFolder(folder_png)
 
                 if event_4 == "Display dynamic view":
 
+                    folder_png = createFolderSave()
+                    for state_3 in list_panel_loading :
+                        fig_3, G = drawLoadGraph(layout_selected_3, interaction_table, node_table, state_3, activate_gene_color_3,
+                                          inactivate_gene_color_3, activate_interaction_color_3, inactivate_interaction_color_3, width_interaction_3, genes_selected_visu_3)
+                        savePNG(fig_3, state_3)
+                    createVideo(folder_png, "load_graph_movie.mp4")
+                    deleteFolder(folder_png)
+
                     ################
-                    vidFile = cv.VideoCapture("test.mp4")
+                    vidFile = cv.VideoCapture("load_graph_movie.mp4")
                     # ---===--- Get some Stats --- #
                     num_frames = vidFile.get(cv.CAP_PROP_FRAME_COUNT)
                     fps = vidFile.get(cv.CAP_PROP_FPS)
@@ -904,7 +860,6 @@ if __name__ == "__main__":
 
                         imgbytes = cv.imencode('.png', frame)[1].tobytes()  # ditto
                         image_elem.update(data=imgbytes)
-
 
         if run == False:
             break
