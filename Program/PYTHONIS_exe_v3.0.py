@@ -453,13 +453,13 @@ if __name__ == "__main__":
                             "cyan", "black"]
 
     state_none = -1
-    layout_selected_previous, layout_selected_previous_2 = None, None
-    activate_gene_color_previous, activate_gene_color_previous_2 = None, None
-    inactivate_gene_color_previous, inactivate_gene_color_previous_2 = None, None
-    activate_interaction_color_previous, activate_interaction_color_previous_2 = None, None
-    inactivate_interaction_color_previous, inactivate_interaction_color_previous_2 = None, None
-    width_interaction_previous, width_interaction_previous_2 = None, None
-    genes_selected_visu_previous, genes_selected_visu_previous_2 = None, None
+    layout_selected_previous, layout_selected_previous_2 , layout_selected_previous_3 = None, None , None
+    activate_gene_color_previous, activate_gene_color_previous_2, activate_gene_color_previous_3 = None, None , None
+    inactivate_gene_color_previous, inactivate_gene_color_previous_2 , inactivate_gene_color_previous_3 = None, None , None
+    activate_interaction_color_previous, activate_interaction_color_previous_2 , activate_interaction_color_previous_3 = None, None , None
+    inactivate_interaction_color_previous, inactivate_interaction_color_previous_2 , inactivate_interaction_color_previous_3= None, None , None
+    width_interaction_previous, width_interaction_previous_2 , width_interaction_previous_3 = None, None , None
+    genes_selected_visu_previous, genes_selected_visu_previous_2 , genes_selected_visu_previous_3 = None, None , None
 
     while True :
         for i in range(7):
@@ -843,17 +843,25 @@ if __name__ == "__main__":
                     for state_3 in list_panel_loading :
                         fig_3, G = drawLoadGraph(layout_selected_3, interaction_table, node_table, state_3, activate_gene_color_3,
                                           inactivate_gene_color_3, activate_interaction_color_3, inactivate_interaction_color_3, width_interaction_3, genes_selected_visu_3, state_3)
-                        savePNG(fig_3, state_3)
                     createVideo(folder_png, name_saved_movie_3)
                     deleteFolder(folder_png)
 
                 if event_4 == "Display dynamic view":
+                    if layout_selected_3 != layout_selected_previous_3 or activate_gene_color_3 != activate_gene_color_previous_3 or inactivate_gene_color_3 != inactivate_gene_color_previous_3 or activate_interaction_color_3 != activate_interaction_color_previous_3 or inactivate_interaction_color_3 != inactivate_interaction_color_previous_3 or width_interaction_3 != width_interaction_previous_3 or genes_selected_visu_3 != genes_selected_visu_previous_3 :
+                        layout_selected_previous_3 = layout_selected_3
+                        activate_gene_color_previous_3 = activate_gene_color_3
+                        inactivate_gene_color_previous_3 = inactivate_gene_color_3
+                        activate_interaction_color_previous_3 = activate_interaction_color_3
+                        inactivate_interaction_color_previous_3 = inactivate_interaction_color_3
+                        width_interaction_previous_3 = width_interaction_3
+                        genes_selected_visu_previous_3 = genes_selected_visu_3
+                        movie_load = False
                     if movie_load == False :
                         folder_png = createFolderSave()
                         for state_3 in list_panel_loading :
                             fig_3, G = drawLoadGraph(layout_selected_3, interaction_table, node_table, state_3, activate_gene_color_3,
                                               inactivate_gene_color_3, activate_interaction_color_3, inactivate_interaction_color_3, width_interaction_3, genes_selected_visu_3, state_3)
-                            savePNG(fig_3, state_3)
+                            
                         createVideo(folder_png, "load_graph_movie.mp4")
                         deleteFolder(folder_png)
                         movie_load = True

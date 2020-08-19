@@ -86,12 +86,13 @@ def openData(load_saved_file):
 
 
 def drawLoadGraph(layout_selected, interaction_table, node_table, graph_selected, color_activate_node,
-                  color_inactivate_node, color_active_edge, color_inactivate_edge, activate_widthedge, genes_selected_visu):
+                  color_inactivate_node, color_active_edge, color_inactivate_edge, activate_widthedge, genes_selected_visu, state):
     G = nx.MultiDiGraph()
     G, global_gene_state = addNodesImport(node_table, graph_selected, G)
     G = addEdgesImport(interaction_table, G)
     fig, G = drawFig(G, global_gene_state, layout_selected, color_activate_node, color_inactivate_node,
-                     color_active_edge, color_inactivate_edge,activate_widthedge, genes_selected_visu)
+                     color_active_edge, color_inactivate_edge,activate_widthedge, genes_selected_visu, state)
+
     return fig, G
 
 
