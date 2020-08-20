@@ -600,7 +600,7 @@ if __name__ == "__main__":
 
                 if event_2 == 'Launch visualization':
                     active_Canva = True
-                    layout_graph = [[sg.Canvas(size=(800,800), key='-CANVAS2-'), sg.Exit()]]
+                    layout_graph = [[sg.Canvas(size=(800,800), key='-CANVAS2-'), sg.Button("Save as PNG")]]
                     window_graph = sg.Window('Interaction Graph',
                                              layout_graph, finalize=True)
 
@@ -612,7 +612,9 @@ if __name__ == "__main__":
                     fig_canvas_agg = draw_figure(window_graph['-CANVAS2-'].TKCanvas, fig)
                     canvas_elem = window_graph['-CANVAS2-']
                     canvas = canvas_elem.TKCanvas
-                    event, values = window_graph.read()
+                    event_graph, values_graph = window_graph.read()
+                    if event_graph == "Save as PNG" :
+                        savePNG(fig, graph_selected, 2)
                     window_graph.close()
                     delete_figure_agg(fig_canvas_agg)
                 if event_2 == "Save graph":
@@ -714,7 +716,7 @@ if __name__ == "__main__":
                 if event_3 == 'Launch visualization':
 
                     active_Canva_2 = True
-                    layout_graph_2 = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Exit()]]
+                    layout_graph_2 = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Button("Save as PNG")]]
                     window_graph_2 = sg.Window('Interaction Graph',
                                              layout_graph_2, finalize=True)
                     fig_2, G = drawGraph(genes_names_list, network_as_list, flow, graph_selected_2,
@@ -726,7 +728,9 @@ if __name__ == "__main__":
                     fig_canvas_agg = draw_figure(window_graph_2['-CANVAS-'].TKCanvas, fig_2)
                     canvas_elem = window_graph_2['-CANVAS-']
                     canvas = canvas_elem.TKCanvas
-                    event, values = window_graph_2.read()
+                    event_graph_2, values_graph_2 = window_graph_2.read()
+                    if event_graph_2 == "Save as PNG" :
+                        savePNG(fig_2, graph_selected_2, 2)
                     window_graph_2.close()
                     delete_figure_agg(fig_canvas_agg)
 
@@ -824,7 +828,7 @@ if __name__ == "__main__":
 
                 if event_4 == 'Launch visualization':
                     active_Canva_3 = True
-                    layout_graph_3 = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Exit()]]
+                    layout_graph_3 = [[sg.Canvas(size=(640, 480), key='-CANVAS-'), sg.Button("Save as PNG")]]
                     window_graph_3 = sg.Window('Interaction Graph',
                                              layout_graph_3, finalize=True)
 
@@ -834,7 +838,9 @@ if __name__ == "__main__":
                     fig_canvas_agg = draw_figure(window_graph_3['-CANVAS-'].TKCanvas, fig_3)
                     canvas_elem = window_graph_3['-CANVAS-']
                     canvas = canvas_elem.TKCanvas
-                    event, values = window_graph_3.read()
+                    event_graph_3, values_graph_3 = window_graph_3.read()
+                    if event_graph_3 == "Save as PNG" :
+                        savePNG(fig_3, graph_selected_3, 2)
                     window_graph_3.close()
                     delete_figure_agg(fig_canvas_agg)
 
@@ -861,7 +867,7 @@ if __name__ == "__main__":
                         for state_3 in list_panel_loading :
                             fig_3, G = drawLoadGraph(layout_selected_3, interaction_table, node_table, state_3, activate_gene_color_3,
                                               inactivate_gene_color_3, activate_interaction_color_3, inactivate_interaction_color_3, width_interaction_3, genes_selected_visu_3, state_3)
-                            
+
                         createVideo(folder_png, "load_graph_movie.mp4")
                         deleteFolder(folder_png)
                         movie_load = True

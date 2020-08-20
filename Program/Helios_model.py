@@ -83,7 +83,7 @@ def drawFig(G, global_gene_state, layout_selected, color_activate_node, color_in
     plt.draw()
     fig = plt.gcf()
     if state != -1 :
-        savePNG(fig, state)
+        savePNG(fig, state, 1)
         plt.clf()
     return fig,G
 
