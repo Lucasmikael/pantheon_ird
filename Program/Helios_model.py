@@ -113,9 +113,10 @@ def getRegulationActivation(network_as_list, genes_names_list, value_source):
         if gene_target == gene_source:
             if interaction == "1":
                 positive_gene.append(gene_source)
-
+                print("pos")
             else:
                 negative_gene.append(gene_source)
+                print("neg")
 
     for i in range(len(genes_names_list)):
         state_gene = []
